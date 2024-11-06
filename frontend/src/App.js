@@ -1,11 +1,31 @@
-import './App.css'; // Your global styles
-import './index.css'; // Tailwind CSS
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+// import Sidebar from './components/sidebar';
+import Sale from './components/Sale';
+import Purchase from './components/Purchase';
+import Brand from './components/Brand';
+import Report from './components/Report';
+import DetailedReport from './components/DetailedReport';
+import Header from './components/Header';
 
 function App() {
   return (
-    <div className="App bg-indigo-500 text-white p-4">
-<h1 className="text-3xl font-bold text-red-500">Hello, Tailwind CSS!</h1>
-</div>
+    <Router>
+       <Header />
+      <div className="flex">
+        {/* <Sidebar /> */}
+        <div className="content flex-1 p-4">
+          <Routes>
+            <Route path="/" element={<h1>Item Master Page</h1>} />
+            <Route path="/sale" element={<Sale />} />
+            <Route path="/purchase" element={<Purchase />} />
+            <Route path="/brand" element={<Brand />} />
+            <Route path="/report" element={<Report />} />
+            <Route path="/detailed-report" element={<DetailedReport />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
 
