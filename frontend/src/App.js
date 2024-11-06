@@ -9,6 +9,8 @@ import DetailedReport from './components/DetailedReport';
 import Header from './components/Header';
 import ItemList from './components/Item_master/Item_list.jsx';
 import AddItem from './components/Item_master/AddItem.jsx';
+import BrandList from './components/Brand_master/BrandList.jsx';
+import AddBrand from './components/Brand_master/AddBrand.jsx';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
           <Routes>
             <Route path="/item" element={<ItemList/>} />
             <Route path="/add-item" element={<AddItem />} />
+            <Route path="/brands" element={<BrandList />} />
+                <Route path="/add-brand" element={<AddBrand />} />
             <Route path="/sale" element={<Sale />} />
             <Route path="/purchase" element={<Purchase />} />
             <Route path="/brand" element={<Brand />} />
