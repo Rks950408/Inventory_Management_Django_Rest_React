@@ -86,17 +86,25 @@ const AddItem = () => {
                     />
                 </div>
                 <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700" htmlFor="category">Category:</label>
-                    <input
-                        type="text"
-                        name="category"
-                        id="category"
-                        value={formData.category}
-                        onChange={handleChange}
-                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                        required
-                    />
-                </div>
+    <label className="block text-sm font-medium text-gray-700" htmlFor="category">Category:</label>
+    <select
+        name="category"
+        id="category"
+        value={formData.category}
+        onChange={handleChange}
+        className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+        required
+    >
+        <option value="">Select a category</option> {/* Empty option for prompt */}
+        <option value="Electronics">Electronics</option>
+        <option value="Stationary">Stationary</option>
+        <option value="Clothing">Clothing</option>
+        <option value="Home Goods">Home Goods</option>
+        <option value="Books">Books</option>
+        <option value="Other">Other</option>
+    </select>
+</div>
+
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700" htmlFor="unit_price">Unit Price:</label>
                     <input
