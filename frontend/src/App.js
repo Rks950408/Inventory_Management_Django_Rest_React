@@ -7,6 +7,8 @@ import Brand from './components/Brand';
 import Report from './components/Report';
 import DetailedReport from './components/DetailedReport';
 import Header from './components/Header';
+import ItemList from './components/Item_master/Item_list.jsx';
+import AddItem from './components/Item_master/AddItem.jsx';
 
 function App() {
   return (
@@ -16,7 +18,8 @@ function App() {
         {/* <Sidebar /> */}
         <div className="content flex-1 p-4">
           <Routes>
-            <Route path="/" element={<h1>Item Master Page</h1>} />
+            <Route path="/item" element={<ItemList/>} />
+            <Route path="/add-item" element={<AddItem />} />
             <Route path="/sale" element={<Sale />} />
             <Route path="/purchase" element={<Purchase />} />
             <Route path="/brand" element={<Brand />} />

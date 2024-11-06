@@ -13,7 +13,10 @@ const Header = () => {
         <nav>
         <ul className="flex space-x-4">
           <li>
-            <Link to="/" className="font-bold">Item Master</Link>
+            <Link to="/item" className="font-bold">Item Master</Link>
+          </li>
+          <li>
+            <Link to="/brand" className="font-bold">Brand</Link>
           </li>
           <li>
             <Link to="/sale" className="font-bold">Sale</Link>
@@ -21,9 +24,7 @@ const Header = () => {
           <li>
             <Link to="/purchase" className="font-bold">Purchase</Link>
           </li>
-          <li>
-            <Link to="/brand" className="font-bold">Brand</Link>
-          </li>
+          
           <li>
             <Link to="/report" className="font-bold">Report</Link>
           </li>
