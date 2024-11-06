@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'item_master',
     'supplier',
     'purchase',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +52,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Your React frontend
 ]
 
 ROOT_URLCONF = 'Inventory_management.urls'
@@ -107,7 +113,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Your React frontend
+]
 
 
 # Internationalization
