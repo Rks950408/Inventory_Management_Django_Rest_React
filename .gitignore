@@ -1,0 +1,16 @@
+
+# Backend
+# backend/venv/                   # Ignore virtual environment
+# /backend/backend_project/__pycache__/   # Ignore Python cache files
+# /backend/api/migrations/                 # Ignore migrations
+# /backend/api/__pycache__/                # Ignore Python cache files
+# /backend/api/tests.py                    # Ignore test files if not needed
+
+# # Frontend
+# /frontend/node_modules/                  # Ignore Node.js modules
+# /frontend/build/                         # Ignore build directory (if applicable
+
+
+backend/venv/
+
+frontend/node_modules/
