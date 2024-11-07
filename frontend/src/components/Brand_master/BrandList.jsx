@@ -7,7 +7,7 @@ const BrandList = () => {
 
     const fetchBrands = async () => {
         try {
-            const response = await fetch('/api/brands/');
+            const response = await fetch('http://127.0.0.1:8001/items_master/get_brands/');
             if (!response.ok) throw new Error('Failed to fetch brands');
             const data = await response.json();
             setBrands(data);
@@ -18,12 +18,12 @@ const BrandList = () => {
 
     useEffect(() => {
         fetchBrands();
-    }, []);
+    }, []); // Fetch brands on component mount
 
     return (
         <div className="container mx-auto mt-5">
             <h2 className="text-2xl font-bold mb-4">Brand List</h2>
-            {/* {message && <div className="mb-4 p-4 bg-red-600 text-white rounded">{message}</div>} */}
+            {message && <div className="mb-4 p-4 bg-red-600 text-white rounded">{message}</div>}
             <table className="min-w-full border border-gray-300">
                 <thead>
                     <tr>
@@ -33,9 +33,9 @@ const BrandList = () => {
                 </thead>
                 <tbody>
                     {brands.length > 0 ? (
-                        brands.map((brand) => (
-                            <tr key={brand.id}>
-                                <td className="border border-gray-300 p-2">{brand.id}</td>
+                        brands.map((brand, index) => (
+                            <tr key={index}>
+                                <td className="border border-gray-300 p-2">{index + 1}</td>
                                 <td className="border border-gray-300 p-2">{brand.brand_name}</td>
                             </tr>
                         ))

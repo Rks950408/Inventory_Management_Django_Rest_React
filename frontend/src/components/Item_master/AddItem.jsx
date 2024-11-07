@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const AddItem = () => {
     const navigate = useNavigate();
+    
     const [formData, setFormData] = useState({
         item_name: '',
         brand: '',
@@ -11,6 +12,25 @@ const AddItem = () => {
         image: null,
     });
     const [message, setMessage] = useState('');
+    const [brands, setBrands] = useState([]);  // State to hold brand data
+
+    // Fetch brands from backend on component mount
+    useEffect(() => {
+        const fetchBrands = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8001/items_master/get_brands/');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch brands');
+                }
+                const data = await response.json();
+                setBrands(data);  // Set the fetched brand data to state
+            } catch (error) {
+                setMessage('Error fetching brands: ' + error.message);
+            }
+        };
+
+        fetchBrands();
+    }, []);  // Empty dependency array ensures this runs only once when the component mounts
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -73,38 +93,49 @@ const AddItem = () => {
                         required
                     />
                 </div>
+
+                {/* Brand Dropdown */}
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700" htmlFor="brand">Brand Name:</label>
-                    <input
-                        type="text"
+                    <select
                         name="brand"
                         id="brand"
                         value={formData.brand}
                         onChange={handleChange}
                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         required
-                    />
+                    >
+                        <option value="">Select a brand</option>
+                        {brands.map((brand) => (
+                            <option key={brand.id} value={brand.brand_name}>
+                                {brand.brand_name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
-                <div className="mb-4">
-    <label className="block text-sm font-medium text-gray-700" htmlFor="category">Category:</label>
-    <select
-        name="category"
-        id="category"
-        value={formData.category}
-        onChange={handleChange}
-        className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-        required
-    >
-        <option value="">Select a category</option> {/* Empty option for prompt */}
-        <option value="Electronics">Electronics</option>
-        <option value="Stationary">Stationary</option>
-        <option value="Clothing">Clothing</option>
-        <option value="Home Goods">Home Goods</option>
-        <option value="Books">Books</option>
-        <option value="Other">Other</option>
-    </select>
-</div>
 
+                {/* Category Dropdown */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="category">Category:</label>
+                    <select
+                        name="category"
+                        id="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        required
+                    >
+                        <option value="">Select a category</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Stationary">Stationary</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Home Goods">Home Goods</option>
+                        <option value="Books">Books</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                {/* Unit Price */}
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700" htmlFor="unit_price">Unit Price:</label>
                     <input
@@ -117,6 +148,8 @@ const AddItem = () => {
                         required
                     />
                 </div>
+
+                {/* Image Upload */}
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700" htmlFor="image">Image:</label>
                     <input
@@ -127,6 +160,7 @@ const AddItem = () => {
                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                     />
                 </div>
+
                 <button type="submit" className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600">Save Item</button>
             </form>
             <br />

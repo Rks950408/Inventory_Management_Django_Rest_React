@@ -13,13 +13,14 @@ const AddBrand = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('/api/brands/', {
+            const response = await fetch('http://127.0.0.1:8001/items_master/create_brand/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ brand_name: brandName }),
+                body: JSON.stringify({ brand_name: brandName }), // Sending brand_name in the body
             });
+
             const data = await response.json();
 
             if (response.ok) {
