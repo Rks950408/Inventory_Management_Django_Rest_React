@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const PurchaseEntry = () => {
-  const [invoiceNo, setInvoiceNo] = useState("INV-20241106-002632");
-  const [invoiceDate, setInvoiceDate] = useState("06-11-2024");
+  const [invoiceNo, setInvoiceNo] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState("");
   const [supplier, setSupplier] = useState("");
+  const [items, setItems] = useState([]); // Store all items from API
   const [itemName, setItemName] = useState("");
   const [brand, setBrand] = useState("");
   const [price, setPrice] = useState("");
@@ -11,6 +13,67 @@ const PurchaseEntry = () => {
   const [total, setTotal] = useState("");
   const [purchaseDetails, setPurchaseDetails] = useState([]);
   const [subTotal, setSubTotal] = useState(0);
+  const [brands, setBrands] = useState([]); // Initialize the brands state variable
+
+  useEffect(() => {
+    // Fetch items data
+    axios
+      .get("http://127.0.0.1:8001/items_master/items/")
+      .then((response) => {
+        setItems(response.data);
+      })
+      .catch((error) => console.error("Error fetching items:", error));
+
+    // Fetch brands data from the new endpoint
+    axios
+      .get("http://127.0.0.1:8001/items_master/get_brands/")
+      .then((response) => {
+        setBrands(response.data); // Set the brands state
+      })
+      .catch((error) => console.error("Error fetching brands:", error));
+
+    // Set invoice number and date
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, "0");
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const yyyy = now.getFullYear();
+    const minsec = `${String(now.getMinutes()).padStart(2, "0")}${String(
+      now.getSeconds()
+    ).padStart(2, "0")}`;
+
+    setInvoiceNo(`IN-${dd}${mm}${yyyy}-${minsec}`);
+    setInvoiceDate(`${dd}-${mm}-${yyyy}`);
+  }, []);
+
+  // Handle item selection change
+ const handleItemChange = (selectedItemName) => {
+   setItemName(selectedItemName);
+
+   const selectedItem = items.find(
+     (item) => item.item_name === selectedItemName
+   );
+   console.log("Selected Item:", selectedItem); // Log selected item to inspect brand ID
+
+   if (selectedItem) {
+     console.log("Selected Item Brand ID:", selectedItem.brand); // Log the brand ID from the selected item
+     console.log("Brands Data:", brands); // Log all brands data
+
+     // Ensure that the brand ID and the brand object have the correct structure
+     const selectedBrand = brands.find(
+       (brand) => String(brand.id) === String(selectedItem.brand) // Ensure both are same type (e.g., string or number)
+     );
+
+     console.log("Selected Brand:", selectedBrand); // Log the result of the find operation
+
+     // Set the brand name or show an error message if not found
+     setBrand(selectedBrand ? selectedBrand.brand_name : "Brand Not Found");
+     setPrice(selectedItem.unit_price);
+   } else {
+     setBrand("No Item Selected");
+     setPrice("");
+   }
+ };
+
 
   const handleAddItem = () => {
     if (itemName && price && quantity) {
@@ -70,13 +133,19 @@ const PurchaseEntry = () => {
           <label className="block mb-2">Item Name:</label>
           <select
             value={itemName}
-            onChange={(e) => setItemName(e.target.value)}
+            onChange={(e) => handleItemChange(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Select Item</option>
-            <option value="Item1">Item1</option>
-            <option value="Item2">Item2</option>
-            {/* Add more item options as needed */}
+            {items.length > 0 ? (
+              items.map((item) => (
+                <option key={item.id} value={item.item_name}>
+                  {item.item_name}
+                </option>
+              ))
+            ) : (
+              <option value="">Loading...</option>
+            )}
           </select>
         </div>
         <div>
@@ -84,9 +153,8 @@ const PurchaseEntry = () => {
           <input
             type="text"
             value={brand}
-            onChange={(e) => setBrand(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
             readOnly
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
           />
         </div>
         <div>
@@ -94,9 +162,8 @@ const PurchaseEntry = () => {
           <input
             type="text"
             value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
             readOnly
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
           />
         </div>
         <div>
@@ -121,6 +188,7 @@ const PurchaseEntry = () => {
           />
         </div>
       </div>
+
       <button
         onClick={handleAddItem}
         className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
@@ -155,9 +223,11 @@ const PurchaseEntry = () => {
           ))}
         </tbody>
       </table>
+
       <div className="mt-4">
         <p className="text-xl font-bold">Sub Total: {subTotal.toFixed(2)}</p>
       </div>
+
       <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
         Submit
       </button>

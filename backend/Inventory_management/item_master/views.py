@@ -97,8 +97,6 @@ def create_brand(request):
 
 @api_view(['GET'])
 def get_brand(request):
-    brands = BrandMaster.objects.all()
-    
-    serializer = BrandMasterSerializer(brands, many=True)  # Use the BrandMaster serializer
-    
-    return Response(serializer.data)
+    brands = BrandMaster.objects.all()  # Retrieve all brand records
+    serializer = BrandMasterSerializer(brands, many=True)  # Serialize all brands
+    return Response(serializer.data)  # Return serialized data as response
