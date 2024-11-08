@@ -4,7 +4,6 @@ import axios from "axios";
 const PurchaseEntry = () => {
   const [invoiceNo, setInvoiceNo] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
-  const [supplier, setSupplier] = useState("");
   const [items, setItems] = useState([]); // Store all items from API
   const [itemName, setItemName] = useState("");
   const [brand, setBrand] = useState("");
@@ -14,6 +13,25 @@ const PurchaseEntry = () => {
   const [purchaseDetails, setPurchaseDetails] = useState([]);
   const [subTotal, setSubTotal] = useState(0);
   const [brands, setBrands] = useState([]); // Initialize the brands state variable
+  const [suppliers, setSuppliers] = useState([]);
+  const [supplier, setSupplier] = useState("");
+
+  // Fetch suppliers from the API
+  useEffect(() => {
+    axios
+      .get("http://127.0.0.1:8001/supplier/suppliers/")
+      .then((response) => {
+        setSuppliers(response.data); // Set fetched suppliers in state
+      })
+      .catch((error) => {
+        console.error("Error fetching suppliers:", error);
+      });
+  }, []);
+
+  // Handle supplier selection
+  const handleSupplierChange = (e) => {
+    setSupplier(e.target.value);
+  };
 
   useEffect(() => {
     // Fetch items data
@@ -46,34 +64,33 @@ const PurchaseEntry = () => {
   }, []);
 
   // Handle item selection change
- const handleItemChange = (selectedItemName) => {
-   setItemName(selectedItemName);
+  const handleItemChange = (selectedItemName) => {
+    setItemName(selectedItemName);
 
-   const selectedItem = items.find(
-     (item) => item.item_name === selectedItemName
-   );
-   console.log("Selected Item:", selectedItem); // Log selected item to inspect brand ID
+    const selectedItem = items.find(
+      (item) => item.item_name === selectedItemName
+    );
+    console.log("Selected Item:", selectedItem); // Log selected item to inspect brand ID
 
-   if (selectedItem) {
-     console.log("Selected Item Brand ID:", selectedItem.brand); // Log the brand ID from the selected item
-     console.log("Brands Data:", brands); // Log all brands data
+    if (selectedItem) {
+      console.log("Selected Item Brand ID:", selectedItem.brand); // Log the brand ID from the selected item
+      console.log("Brands Data:", brands); // Log all brands data
 
-     // Ensure that the brand ID and the brand object have the correct structure
-     const selectedBrand = brands.find(
-       (brand) => String(brand.id) === String(selectedItem.brand) // Ensure both are same type (e.g., string or number)
-     );
+      // Ensure that the brand ID and the brand object have the correct structure
+      const selectedBrand = brands.find(
+        (brand) => String(brand.id) === String(selectedItem.brand) // Ensure both are same type (e.g., string or number)
+      );
 
-     console.log("Selected Brand:", selectedBrand); // Log the result of the find operation
+      console.log("Selected Brand:", selectedBrand); // Log the result of the find operation
 
-     // Set the brand name or show an error message if not found
-     setBrand(selectedBrand ? selectedBrand.brand_name : "Brand Not Found");
-     setPrice(selectedItem.unit_price);
-   } else {
-     setBrand("No Item Selected");
-     setPrice("");
-   }
- };
-
+      // Set the brand name or show an error message if not found
+      setBrand(selectedBrand ? selectedBrand.brand_name : "Brand Not Found");
+      setPrice(selectedItem.unit_price);
+    } else {
+      setBrand("No Item Selected");
+      setPrice("");
+    }
+  };
 
   const handleAddItem = () => {
     if (itemName && price && quantity) {
@@ -117,13 +134,19 @@ const PurchaseEntry = () => {
           <label className="block mb-2">Supplier Name:</label>
           <select
             value={supplier}
-            onChange={(e) => setSupplier(e.target.value)}
+            onChange={handleSupplierChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Select Supplier</option>
-            <option value="Supplier1">Supplier1</option>
-            <option value="Supplier2">Supplier2</option>
-            {/* Add more supplier options as needed */}
+            {suppliers.map((sup) => (
+              <option
+                key={sup.id}
+                value={sup.name}
+                disabled={sup.name === supplier} // Disable if already selected
+              >
+                {sup.name}
+              </option>
+            ))}
           </select>
         </div>
       </div>

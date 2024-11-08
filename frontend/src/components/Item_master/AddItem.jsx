@@ -83,7 +83,7 @@ const AddItem = () => {
 
      if (response.ok) {
        setMessage("Item added successfully!");
-       setTimeout(() => navigate("/items"), 2000); // Redirect after 2 seconds
+       setTimeout(() => navigate("/item"), 1000); // Redirect after 2 seconds
      } else {
        setMessage(`Error: ${data.message || "Failed to add item."}`);
      }
