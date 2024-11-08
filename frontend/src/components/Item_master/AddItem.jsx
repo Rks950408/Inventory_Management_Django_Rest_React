@@ -225,7 +225,7 @@ const AddItem = () => {
       </form>
       <br />
       <button
-        onClick={() => navigate("/items")}
+        onClick={() => navigate("/item")}
         className="bg-gray-500 text-white rounded px-4 py-2 hover:bg-gray-600"
       >
         Back to Items List
