@@ -113,9 +113,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",  # Your React frontend
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Your React frontend
+]
 
 
 # Internationalization
