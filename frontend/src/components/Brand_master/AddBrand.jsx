@@ -28,7 +28,11 @@ const AddBrand = () => {
                 setBrandName('');
                 setTimeout(() => navigate('/brands'), 2000); // Redirect after 2 seconds
             } else {
-                setMessage(`Error: ${data.message || 'Failed to add brand.'}`);
+                setMessage(
+                  `Error: ${
+                    data.message || "Brand with this name already exists."
+                  }`
+                );
             }
         } catch (error) {
             setMessage('Error: Something went wrong.');
