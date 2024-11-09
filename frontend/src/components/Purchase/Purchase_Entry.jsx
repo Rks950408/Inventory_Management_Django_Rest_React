@@ -64,7 +64,7 @@ const PurchaseEntry = () => {
 
   const handleAddItem = () => {
     if (itemName && price && quantity) {
-      const itemTotal = parseFloat(price) * parseInt(quantity, 10);
+       const itemTotal = parseFloat((price * quantity).toFixed(2));
       const existingItemIndex = purchaseDetails.findIndex(
         (item) => item.itemName === itemName
       );
@@ -102,6 +102,18 @@ const PurchaseEntry = () => {
     setPurchaseDetails((prevDetails) =>
       prevDetails.filter((_, i) => i !== index)
     );
+  };
+
+  const handleSubmit = () => {
+    const purchaseData = {
+      invoiceNo,
+      invoiceDate,
+      supplier,
+      purchaseDetails,
+      subTotal,
+    };
+
+    console.log("Submitted Purchase Data:", purchaseData);
   };
 
   return (
@@ -234,7 +246,7 @@ const PurchaseEntry = () => {
               <td className="py-2 px-4 text-center">
                 <button
                   onClick={() => handleDelete(index)}
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                  className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600"
                 >
                   Delete
                 </button>
@@ -244,10 +256,14 @@ const PurchaseEntry = () => {
         </tbody>
       </table>
 
-      <div className="mt-4">
-        <p className="text-xl font-bold">Sub Total: {subTotal.toFixed(2)}</p>
+      <div className="mt-4 text-right">
+        <strong>Subtotal: {subTotal.toFixed(2)}</strong>{" "}
       </div>
-      <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+
+      <button
+        onClick={handleSubmit}
+        className="bg-green-500 text-white px-4 py-2 mt-4 rounded-md hover:bg-green-600"
+      >
         Submit
       </button>
     </div>
