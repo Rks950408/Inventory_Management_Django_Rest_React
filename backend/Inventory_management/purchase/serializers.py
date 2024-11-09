@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import PurchaseMaster, PurchaseDetails
+from .models import PurchaseMaster, PurchaseDetails,SaleDetails,SaleMaster
 from item_master.models import Item
 from supplier.models import Supplier
 from .supplier_serializers import SupplierSerializer  # Corrected import
@@ -82,3 +82,57 @@ class PurchaseMasterSerializer2(serializers.ModelSerializer):
     class Meta:
         model = PurchaseMaster
         fields = ['id', 'invoice_no', 'invoice_date', 'supplier', 'total_amount', 'datetime', 'status', 'purchase_details']
+
+
+# sale serializers
+class SaleDetailsSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(write_only=True)  # Accepts item name from frontend
+
+    class Meta:
+        model = SaleDetails
+        fields = ['item_name', 'brand_name', 'quantity', 'price', 'amount', 'status']
+
+    def validate_item_name(self, value):
+        try:
+            item = Item.objects.get(item_name=value)  # Convert item_name to item instance
+            return item
+        except Item.DoesNotExist:
+            raise serializers.ValidationError(f"Item '{value}' not found.")
+
+    def create(self, validated_data):
+        item_instance = validated_data.pop('item_name')  # Replace item_name with item instance
+        sale_detail = SaleDetails.objects.create(item=item_instance, **validated_data)
+        return sale_detail
+
+class SaleMasterSerializer(serializers.ModelSerializer):
+    customer = serializers.CharField(write_only=True)  # Accepts supplier name instead of ID
+    sale_details = SaleDetailsSerializer(many=True)  # Nested serializer for multiple sale details
+
+    class Meta:
+        model = SaleMaster
+        fields = ['invoice_no', 'invoice_date', 'customer', 'total_amount', 'sale_details', 'status']
+
+    def validate_customer(self, value):
+        try:
+            customer = Supplier.objects.get(name=value)  # Convert customer name to supplier instance
+            return customer
+        except Supplier.DoesNotExist:
+            raise serializers.ValidationError(f"Customer '{value}' not found.")
+
+    def create(self, validated_data):
+        customer_instance = validated_data.pop('customer')
+        sale_details_data = validated_data.pop('sale_details')
+
+        # Create SaleMaster entry
+        sale_master = SaleMaster.objects.create(customer=customer_instance, **validated_data)
+
+        # Create SaleDetails entries
+        for detail_data in sale_details_data:
+            item = detail_data.pop('item_name')  # Retrieve item instance from validated data
+            SaleDetails.objects.create(
+                sale_master=sale_master,
+                item=item,
+                **detail_data
+            )
+
+        return sale_master

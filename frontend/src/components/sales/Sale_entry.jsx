@@ -71,10 +71,10 @@ const handleItemChange = async (selectedItemName) => {
       // Check if the response has the expected data format
       if (
         quantityResponse.data &&
-        quantityResponse.data.total_quantity !== undefined
+        quantityResponse.data.available_quantity !== undefined
       ) {
         setAvailableQuantity(
-          quantityResponse.data.total_quantity || "Not Available"
+          quantityResponse.data.available_quantity || "Not Available"
         );
       } else {
         setAvailableQuantity("Quantity Not Found");
@@ -91,40 +91,55 @@ const handleItemChange = async (selectedItemName) => {
   }
 };
 
-  const handleAddItem = () => {
-    if (itemName && price && quantity) {
-      const itemTotal = parseFloat((price * quantity).toFixed(2));
-      const existingItemIndex = purchaseDetails.findIndex(
-        (item) => item.itemName === itemName
-      );
+ const handleAddItem = () => {
+   if (itemName && price && quantity) {
+     const enteredQuantity = parseInt(quantity, 10);
 
-      if (existingItemIndex !== -1) {
-        const updatedDetails = [...purchaseDetails];
-        updatedDetails[existingItemIndex].quantity += parseInt(quantity, 10);
-        updatedDetails[existingItemIndex].total += itemTotal;
-        setPurchaseDetails(updatedDetails);
-      } else {
-        setPurchaseDetails([
-          ...purchaseDetails,
-          {
-            itemName,
-            brand,
-            price,
-            quantity: parseInt(quantity, 10),
-            total: itemTotal,
-          },
-        ]);
-      }
+     // Check if quantity is greater than zero
+     if (enteredQuantity <= 0) {
+       alert("Quantity must be greater than zero.");
+       return; // Exit function if invalid quantity
+     }
 
-      setSubTotal((prev) => prev + itemTotal);
-      setItemName("");
-      setBrand("");
-      setPrice("");
-      setQuantity("");
-      setTotal("");
-      setAvailableQuantity("");
-    }
-  };
+     // If entered quantity is less than or equal to available quantity
+     if (enteredQuantity > parseInt(availableQuantity, 10)) {
+       alert("Entered quantity is greater than available stock!");
+       return; // Exit function if quantity is greater than available stock
+     }
+
+     const itemTotal = parseFloat((price * enteredQuantity).toFixed(2));
+     const existingItemIndex = purchaseDetails.findIndex(
+       (item) => item.itemName === itemName
+     );
+
+     if (existingItemIndex !== -1) {
+       const updatedDetails = [...purchaseDetails];
+       updatedDetails[existingItemIndex].quantity += enteredQuantity;
+       updatedDetails[existingItemIndex].total += itemTotal;
+       setPurchaseDetails(updatedDetails);
+     } else {
+       setPurchaseDetails([
+         ...purchaseDetails,
+         {
+           itemName,
+           brand,
+           price,
+           quantity: enteredQuantity,
+           total: itemTotal,
+         },
+       ]);
+     }
+
+     setSubTotal((prev) => prev + itemTotal);
+     setItemName("");
+     setBrand("");
+     setPrice("");
+     setQuantity("");
+     setTotal("");
+     setAvailableQuantity("");
+   }
+ };
+
   const handleDelete = (index) => {
     const itemToDelete = purchaseDetails[index];
     setSubTotal((prev) => prev - itemToDelete.total);
@@ -134,48 +149,59 @@ const handleItemChange = async (selectedItemName) => {
   };
 
   const handleSubmit = async () => {
-    const formattedPurchaseDetails = purchaseDetails.map((item) => ({
-      item_name: item.itemName,
-      brand_name: item.brand,
-      price: item.price,
-      quantity: item.quantity,
-      amount: item.total, // Use `amount` instead of `total`
+    // Format the purchase details to match the sale details structure
+    const formattedSaleDetails = purchaseDetails.map((item) => ({
+      item_name: item.itemName, // Corresponds to the item name
+      brand_name: item.brand, // Corresponds to the brand name
+      price: item.price, // Price of the item
+      quantity: item.quantity, // Quantity purchased
+      amount: item.total, // Total amount for this item (price * quantity)
     }));
 
-    const purchaseData = {
+    // Structure the purchase data with all required fields
+    const saleData = {
       invoice_no: invoiceNo,
       invoice_date: invoiceDate,
-      supplier,
-      total_amount: subTotal,
-      purchase_details: formattedPurchaseDetails, // Use the formatted array
+      customer: supplier, // Customer corresponds to supplier here
+      total_amount: subTotal, // Total amount for the entire sale
+      status: true, // Optional field, set to true by default
+      sale_details: formattedSaleDetails, // The formatted sale details
     };
 
     try {
+      // Make the POST request to the API
       const response = await axios.post(
-        "http://127.0.0.1:8001/purchases/purchase-entry/",
-        purchaseData,
+        "http://127.0.0.1:8001/purchases/sales/create/",
+        saleData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json", // Set the correct content type
           },
         }
       );
-      console.log("Purchase data submitted successfully:", response.data);
-      setSuccessMessage(response.data.message);
-      // Reset form after successful submission
+
+      // Log the successful response
+      console.log("Sale data submitted successfully:", response.data);
+      setSuccessMessage(response.data.message); // Show the success message
+
+      // Reset form values after successful submission
       setInvoiceNo("");
       setInvoiceDate("");
       setSupplier("");
       setPurchaseDetails([]);
       setSubTotal(0);
     } catch (error) {
-      console.error("Error submitting purchase data:", error);
-      setSuccessMessage("Failed to submit purchase data. Please try again.");
+      // Log any errors if the request fails
+      console.error("Error submitting Sale data:", error);
+      setSuccessMessage("Failed to submit Sale data. Please try again.");
     }
+
+    // Navigate to the purchase list after a short delay
     setTimeout(() => {
       navigate("/purchase-list");
     }, 1000);
   };
+
 
   return (
     <div className="container mx-auto p-6">
@@ -273,12 +299,20 @@ const handleItemChange = async (selectedItemName) => {
             type="number"
             value={quantity}
             onChange={(e) => {
-              setQuantity(e.target.value);
-              setTotal(e.target.value * price);
+              const newQuantity = e.target.value;
+
+              // Check if the new quantity is greater than or equal to 1
+              if (newQuantity >= 0 || newQuantity === "") {
+                setQuantity(newQuantity);
+                setTotal(newQuantity * price);
+              } else {
+                alert("Quantity must be greater than zero.");
+              }
             }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
         </div>
+
         <div>
           <label className="block mb-2">Total:</label>
           <input
@@ -295,7 +329,7 @@ const handleItemChange = async (selectedItemName) => {
       >
         Add Item
       </button>
-      <h3 className="text-2xl font-bold mt-6">Purchase Details</h3>
+      <h3 className="text-2xl font-bold mt-6">Sale Details</h3>
       <table className="w-full border mt-4">
         <thead>
           <tr className="bg-gray-800 text-white">

@@ -2,8 +2,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum
+from .serializers import SaleMasterSerializer
 from .serializers import PurchaseMasterSerializer,PurchaseMasterSerializer1,PurchaseMasterSerializer2
-from .models import PurchaseMaster,PurchaseDetails
+from .models import PurchaseMaster,PurchaseDetails,SaleDetails,SaleMaster
 
 @api_view(['POST'])
 def create_purchase(request):
@@ -48,10 +49,34 @@ def get_purchase_details_by_master_id(request, purchase_master_id):
 @api_view(['GET'])
 def get_total_quantity_for_item(request, item_id):
     try:
-        # Calculate the total quantity for the specified item
+        # Calculate the total quantity purchased for the specified item
         total_quantity = PurchaseDetails.objects.filter(item_id=item_id).aggregate(Sum('quantity'))['quantity__sum'] or 0
         
-        return Response({'item_id': item_id, 'total_quantity': total_quantity}, status=status.HTTP_200_OK)
+        # Calculate the total quantity sold for the specified item
+        sold_quantity = SaleDetails.objects.filter(item_id=item_id).aggregate(Sum('quantity'))['quantity__sum'] or 0
+        
+        # Calculate the available quantity
+        available_quantity = total_quantity - sold_quantity
+        
+        # Return the total quantity, sold quantity, and available quantity
+        return Response({
+            'item_id': item_id,
+            'total_quantity': total_quantity,
+            'sold_quantity': sold_quantity,
+            'available_quantity': available_quantity
+        }, status=status.HTTP_200_OK)
     
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+# sale api 
+@api_view(['POST'])
+def create_sale(request):
+    serializer = SaleMasterSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Sale entry created successfully"}, status=status.HTTP_201_CREATED)
+
+    # Return error messages if data is invalid
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
