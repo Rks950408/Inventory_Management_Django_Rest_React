@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import PurchaseMaster, PurchaseDetails
 from item_master.models import Item
 from supplier.models import Supplier
-
+from .supplier_serializers import SupplierSerializer  # Corrected import
 class PurchaseDetailsSerializer(serializers.ModelSerializer):
     item_name = serializers.CharField(write_only=True)  # Accepts item name from frontend instead of ID
 
@@ -58,3 +58,27 @@ class PurchaseMasterSerializer(serializers.ModelSerializer):
             )
 
         return purchase_master
+
+
+class PurchaseMasterSerializer1(serializers.ModelSerializer):
+    supplier_name = serializers.CharField(source='get_supplier_name', read_only=True)
+
+    class Meta:
+        model = PurchaseMaster
+        fields = ['id', 'invoice_no', 'invoice_date', 'total_amount', 'datetime', 'status', 'supplier_name']
+
+# Serializer for PurchaseDetails, including item_name
+class PurchaseDetailsSerializer2(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.item_name', read_only=True)  # Correct field name
+
+    class Meta:
+        model = PurchaseDetails
+        fields = ['id', 'item_name', 'brand_name', 'quantity', 'price', 'amount', 'datetime', 'status']
+
+# Serializer for PurchaseMaster with nested PurchaseDetails
+class PurchaseMasterSerializer2(serializers.ModelSerializer):
+    purchase_details = PurchaseDetailsSerializer2(source='purchasedetails_set', many=True)  # Related field name might vary
+    supplier = SupplierSerializer()  # Include the supplier details
+    class Meta:
+        model = PurchaseMaster
+        fields = ['id', 'invoice_no', 'invoice_date', 'supplier', 'total_amount', 'datetime', 'status', 'purchase_details']

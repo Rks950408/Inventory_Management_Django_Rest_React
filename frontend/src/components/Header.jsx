@@ -11,7 +11,7 @@ const Header = () => {
       <div className="flex justify-end">
         <nav>
           <ul className="flex space-x-4">
-          <li>
+            <li>
               <Link to="/brands" className="font-bold">
                 Brand
               </Link>
@@ -21,14 +21,14 @@ const Header = () => {
                 Item Master
               </Link>
             </li>
-            
+
             <li>
               <Link to="/suppliers" className="font-bold">
                 Supplier
               </Link>
             </li>
             <li>
-              <Link to="/purchase" className="font-bold">
+              <Link to="/purchase-list" className="font-bold">
                 Purchase
               </Link>
             </li>

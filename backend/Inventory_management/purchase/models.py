@@ -14,7 +14,9 @@ class PurchaseMaster(models.Model):
 
     def __str__(self):
         return self.invoice_no
-    
+    def get_supplier_name(self):
+        return self.supplier.name if self.supplier else None  # Assuming Supplier has a 'name' field
+
     class Meta:
         db_table = 'purchase_master'
         # managed = False

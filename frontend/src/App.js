@@ -17,6 +17,8 @@ import PurchaseEntry from './components/Purchase/Purchase_Entry.jsx';
 import SaleEntry from './components/sales/Sale_entry.jsx';
 import ItemStockList from './components/Details/ItemStockList.jsx';
 import DetailedList from './components/DetailsReport/DetailedList.jsx';
+import PurchasesList from './components/Purchase/PurchaseList.jsx';
+import PurchaseDetails from './components/Purchase/PurchaseDetails.jsx';
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
 
             <Route path="/add-brand" element={<AddBrand />} />
             <Route path="/sale" element={<SaleEntry />} />
+            <Route path="/purchase-list" element={<PurchasesList />} />
+            <Route path="/purchase-details/:id" element={<PurchaseDetails />} />
             <Route path="/purchase" element={<PurchaseEntry />} />
             <Route path="/brand" element={<Brand />} />
             <Route path="/report" element={<ItemStockList />} />
