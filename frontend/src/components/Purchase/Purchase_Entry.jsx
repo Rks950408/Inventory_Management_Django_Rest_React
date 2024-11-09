@@ -4,7 +4,7 @@ import axios from "axios";
 const PurchaseEntry = () => {
   const [invoiceNo, setInvoiceNo] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
-  const [items, setItems] = useState([]); // Store all items from API
+  const [items, setItems] = useState([]);
   const [itemName, setItemName] = useState("");
   const [brand, setBrand] = useState("");
   const [price, setPrice] = useState("");
@@ -12,44 +12,26 @@ const PurchaseEntry = () => {
   const [total, setTotal] = useState("");
   const [purchaseDetails, setPurchaseDetails] = useState([]);
   const [subTotal, setSubTotal] = useState(0);
-  const [brands, setBrands] = useState([]); // Initialize the brands state variable
+  const [brands, setBrands] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [supplier, setSupplier] = useState("");
-  // Fetch suppliers from the API
+
   useEffect(() => {
     axios
       .get("http://127.0.0.1:8001/supplier/suppliers/")
-      .then((response) => {
-        setSuppliers(response.data); // Set fetched suppliers in state
-      })
-      .catch((error) => {
-        console.error("Error fetching suppliers:", error);
-      });
-  }, []);
+      .then((response) => setSuppliers(response.data))
+      .catch((error) => console.error("Error fetching suppliers:", error));
 
-  // Handle supplier selection
-  const handleSupplierChange = (e) => {
-    setSupplier(e.target.value);
-  };
-
-  useEffect(() => {
-    // Fetch items data
     axios
       .get("http://127.0.0.1:8001/items_master/items/")
-      .then((response) => {
-        setItems(response.data);
-      })
+      .then((response) => setItems(response.data))
       .catch((error) => console.error("Error fetching items:", error));
 
-    // Fetch brands data from the new endpoint
     axios
       .get("http://127.0.0.1:8001/items_master/get_brands/")
-      .then((response) => {
-        setBrands(response.data); // Set the brands state
-      })
+      .then((response) => setBrands(response.data))
       .catch((error) => console.error("Error fetching brands:", error));
 
-    // Set invoice number and date
     const now = new Date();
     const dd = String(now.getDate()).padStart(2, "0");
     const mm = String(now.getMonth() + 1).padStart(2, "0");
@@ -57,32 +39,21 @@ const PurchaseEntry = () => {
     const minsec = `${String(now.getMinutes()).padStart(2, "0")}${String(
       now.getSeconds()
     ).padStart(2, "0")}`;
-
     setInvoiceNo(`IN-${dd}${mm}${yyyy}-${minsec}`);
     setInvoiceDate(`${dd}-${mm}-${yyyy}`);
   }, []);
 
-  // Handle item selection change
+  const handleSupplierChange = (e) => setSupplier(e.target.value);
+
   const handleItemChange = (selectedItemName) => {
     setItemName(selectedItemName);
-
     const selectedItem = items.find(
       (item) => item.item_name === selectedItemName
     );
-    console.log("Selected Item:", selectedItem); // Log selected item to inspect brand ID
-
     if (selectedItem) {
-      console.log("Selected Item Brand ID:", selectedItem.brand); // Log the brand ID from the selected item
-      console.log("Brands Data:", brands); // Log all brands data
-
-      // Ensure that the brand ID and the brand object have the correct structure
       const selectedBrand = brands.find(
-        (brand) => String(brand.id) === String(selectedItem.brand) // Ensure both are same type (e.g., string or number)
+        (brand) => String(brand.id) === String(selectedItem.brand)
       );
-
-      console.log("Selected Brand:", selectedBrand); // Log the result of the find operation
-
-      // Set the brand name or show an error message if not found
       setBrand(selectedBrand ? selectedBrand.brand_name : "Brand Not Found");
       setPrice(selectedItem.unit_price);
     } else {
@@ -94,10 +65,28 @@ const PurchaseEntry = () => {
   const handleAddItem = () => {
     if (itemName && price && quantity) {
       const itemTotal = parseFloat(price) * parseInt(quantity, 10);
-      setPurchaseDetails([
-        ...purchaseDetails,
-        { itemName, brand, price, quantity, total: itemTotal },
-      ]);
+      const existingItemIndex = purchaseDetails.findIndex(
+        (item) => item.itemName === itemName
+      );
+
+      if (existingItemIndex !== -1) {
+        const updatedDetails = [...purchaseDetails];
+        updatedDetails[existingItemIndex].quantity += parseInt(quantity, 10);
+        updatedDetails[existingItemIndex].total += itemTotal;
+        setPurchaseDetails(updatedDetails);
+      } else {
+        setPurchaseDetails([
+          ...purchaseDetails,
+          {
+            itemName,
+            brand,
+            price,
+            quantity: parseInt(quantity, 10),
+            total: itemTotal,
+          },
+        ]);
+      }
+
       setSubTotal((prev) => prev + itemTotal);
       setItemName("");
       setBrand("");
@@ -107,12 +96,14 @@ const PurchaseEntry = () => {
     }
   };
 
-  // Function to handle deletion
-  const handleDelete = (itemId) => {
+  const handleDelete = (index) => {
+    const itemToDelete = purchaseDetails[index];
+    setSubTotal((prev) => prev - itemToDelete.total);
     setPurchaseDetails((prevDetails) =>
-      prevDetails.filter((item) => item.id !== itemId)
+      prevDetails.filter((_, i) => i !== index)
     );
   };
+
   return (
     <div className="container mx-auto p-6">
       <h2 className="text-3xl font-bold mb-6">Purchase Entry</h2>
@@ -147,7 +138,7 @@ const PurchaseEntry = () => {
               <option
                 key={sup.id}
                 value={sup.name}
-                disabled={sup.name === supplier} // Disable if already selected
+                disabled={sup.name === supplier}
               >
                 {sup.name}
               </option>
@@ -165,15 +156,11 @@ const PurchaseEntry = () => {
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Select Item</option>
-            {items.length > 0 ? (
-              items.map((item) => (
-                <option key={item.id} value={item.item_name}>
-                  {item.item_name}
-                </option>
-              ))
-            ) : (
-              <option value="">Loading...</option>
-            )}
+            {items.map((item) => (
+              <option key={item.id} value={item.item_name}>
+                {item.item_name}
+              </option>
+            ))}
           </select>
         </div>
         <div>
@@ -246,7 +233,7 @@ const PurchaseEntry = () => {
               <td className="py-2 px-4 text-center">{item.total.toFixed(2)}</td>
               <td className="py-2 px-4 text-center">
                 <button
-                  onClick={() => handleDelete(item.id)} // Call handleDelete with item ID
+                  onClick={() => handleDelete(index)}
                   className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
                 >
                   Delete
@@ -260,7 +247,6 @@ const PurchaseEntry = () => {
       <div className="mt-4">
         <p className="text-xl font-bold">Sub Total: {subTotal.toFixed(2)}</p>
       </div>
-
       <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
         Submit
       </button>
