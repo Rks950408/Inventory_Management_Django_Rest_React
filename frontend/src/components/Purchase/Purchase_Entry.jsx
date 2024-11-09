@@ -15,6 +15,7 @@ const PurchaseEntry = () => {
   const [brands, setBrands] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [supplier, setSupplier] = useState("");
+  const [successMessage, setSuccessMessage] = useState(""); // New state for success message
 
   useEffect(() => {
     axios
@@ -40,7 +41,7 @@ const PurchaseEntry = () => {
       now.getSeconds()
     ).padStart(2, "0")}`;
     setInvoiceNo(`IN-${dd}${mm}${yyyy}-${minsec}`);
-    setInvoiceDate(`${dd}-${mm}-${yyyy}`);
+    setInvoiceDate(`${yyyy}-${mm}-${dd}`); // Set to API format (YYYY-MM-DD)
   }, []);
 
   const handleSupplierChange = (e) => setSupplier(e.target.value);
@@ -64,7 +65,7 @@ const PurchaseEntry = () => {
 
   const handleAddItem = () => {
     if (itemName && price && quantity) {
-       const itemTotal = parseFloat((price * quantity).toFixed(2));
+      const itemTotal = parseFloat((price * quantity).toFixed(2));
       const existingItemIndex = purchaseDetails.findIndex(
         (item) => item.itemName === itemName
       );
@@ -78,7 +79,7 @@ const PurchaseEntry = () => {
         setPurchaseDetails([
           ...purchaseDetails,
           {
-            itemName,
+            item_name: itemName,
             brand,
             price,
             quantity: parseInt(quantity, 10),
@@ -104,21 +105,47 @@ const PurchaseEntry = () => {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const purchaseData = {
-      invoiceNo,
-      invoiceDate,
+      invoice_no: invoiceNo,
+      invoice_date: invoiceDate,
       supplier,
-      purchaseDetails,
-      subTotal,
+      total_amount: subTotal,
+      purchase_details: purchaseDetails,
     };
 
-    console.log("Submitted Purchase Data:", purchaseData);
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8001/purchases/purchase-entry/",
+        purchaseData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Purchase data submitted successfully:", response.data);
+      setSuccessMessage(response.data.message); // Display success message
+      // Reset form after successful submission
+      setInvoiceNo("");
+      setInvoiceDate("");
+      setSupplier("");
+      setPurchaseDetails([]);
+      setSubTotal(0);
+    } catch (error) {
+      console.error("Error submitting purchase data:", error);
+      setSuccessMessage("Failed to submit purchase data. Please try again.");
+    }
   };
 
   return (
     <div className="container mx-auto p-6">
       <h2 className="text-3xl font-bold mb-6">Purchase Entry</h2>
+      {successMessage && (
+        <div className="text-green-500 font-semibold mb-4">
+          {successMessage}
+        </div>
+      )}
       <div className="grid grid-cols-3 gap-4 mb-4">
         <div>
           <label className="block mb-2">Invoice No:</label>
@@ -158,7 +185,6 @@ const PurchaseEntry = () => {
           </select>
         </div>
       </div>
-
       <div className="grid grid-cols-5 gap-4 mb-4">
         <div>
           <label className="block mb-2">Item Name:</label>
@@ -215,14 +241,12 @@ const PurchaseEntry = () => {
           />
         </div>
       </div>
-
       <button
         onClick={handleAddItem}
         className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
       >
         Add Item
       </button>
-
       <h3 className="text-2xl font-bold mt-6">Purchase Details</h3>
       <table className="w-full border mt-4">
         <thead>
@@ -255,11 +279,9 @@ const PurchaseEntry = () => {
           ))}
         </tbody>
       </table>
-
       <div className="mt-4 text-right">
         <strong>Subtotal: {subTotal.toFixed(2)}</strong>{" "}
       </div>
-
       <button
         onClick={handleSubmit}
         className="bg-green-500 text-white px-4 py-2 mt-4 rounded-md hover:bg-green-600"
