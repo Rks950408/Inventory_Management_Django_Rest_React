@@ -15,7 +15,6 @@ const PurchaseEntry = () => {
   const [brands, setBrands] = useState([]); // Initialize the brands state variable
   const [suppliers, setSuppliers] = useState([]);
   const [supplier, setSupplier] = useState("");
-
   // Fetch suppliers from the API
   useEffect(() => {
     axios
@@ -108,6 +107,12 @@ const PurchaseEntry = () => {
     }
   };
 
+  // Function to handle deletion
+  const handleDelete = (itemId) => {
+    setPurchaseDetails((prevDetails) =>
+      prevDetails.filter((item) => item.id !== itemId)
+    );
+  };
   return (
     <div className="container mx-auto p-6">
       <h2 className="text-3xl font-bold mb-6">Purchase Entry</h2>
@@ -235,12 +240,17 @@ const PurchaseEntry = () => {
           {purchaseDetails.map((item, index) => (
             <tr key={index} className="border-b">
               <td className="py-2 px-4 text-center">{index + 1}</td>
-              <td className="py-2 px-4">{item.itemName}</td>
-              <td className="py-2 px-4">{item.price}</td>
-              <td className="py-2 px-4">{item.quantity}</td>
-              <td className="py-2 px-4">{item.total.toFixed(2)}</td>
-              <td className="py-2 px-4">
-                {/* Add action button for delete or edit */}
+              <td className="py-2 px-4 text-center">{item.itemName}</td>
+              <td className="py-2 px-4 text-center">{item.price}</td>
+              <td className="py-2 px-4 text-center">{item.quantity}</td>
+              <td className="py-2 px-4 text-center">{item.total.toFixed(2)}</td>
+              <td className="py-2 px-4 text-center">
+                <button
+                  onClick={() => handleDelete(item.id)} // Call handleDelete with item ID
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
