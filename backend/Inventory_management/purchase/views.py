@@ -1,8 +1,9 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models import Sum
 from .serializers import PurchaseMasterSerializer,PurchaseMasterSerializer1,PurchaseMasterSerializer2
-from .models import PurchaseMaster
+from .models import PurchaseMaster,PurchaseDetails
 
 @api_view(['POST'])
 def create_purchase(request):
@@ -43,3 +44,14 @@ def get_purchase_details_by_master_id(request, purchase_master_id):
     
     except PurchaseMaster.DoesNotExist:
         return Response({"error": "PurchaseMaster not found for the given ID"}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['GET'])
+def get_total_quantity_for_item(request, item_id):
+    try:
+        # Calculate the total quantity for the specified item
+        total_quantity = PurchaseDetails.objects.filter(item_id=item_id).aggregate(Sum('quantity'))['quantity__sum'] or 0
+        
+        return Response({'item_id': item_id, 'total_quantity': total_quantity}, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

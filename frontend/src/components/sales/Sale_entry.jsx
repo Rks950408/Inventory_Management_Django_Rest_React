@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const SaleEntry = () => {
+  const navigate = useNavigate();
   const [invoiceNo, setInvoiceNo] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
   const [items, setItems] = useState([]);
@@ -10,12 +12,13 @@ const SaleEntry = () => {
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
   const [total, setTotal] = useState("");
+  const [availableQuantity, setAvailableQuantity] = useState("");
   const [purchaseDetails, setPurchaseDetails] = useState([]);
   const [subTotal, setSubTotal] = useState(0);
   const [brands, setBrands] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [supplier, setSupplier] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); // New state for success message
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     axios
@@ -41,27 +44,52 @@ const SaleEntry = () => {
       now.getSeconds()
     ).padStart(2, "0")}`;
     setInvoiceNo(`IN-${dd}${mm}${yyyy}-${minsec}`);
-    setInvoiceDate(`${yyyy}-${mm}-${dd}`); // Set to API format (YYYY-MM-DD)
+    setInvoiceDate(`${yyyy}-${mm}-${dd}`);
   }, []);
 
   const handleSupplierChange = (e) => setSupplier(e.target.value);
+const handleItemChange = async (selectedItemName) => {
+  setItemName(selectedItemName); // Update the selected item name state
 
-  const handleItemChange = (selectedItemName) => {
-    setItemName(selectedItemName);
-    const selectedItem = items.find(
-      (item) => item.item_name === selectedItemName
+  const selectedItem = items.find(
+    (item) => item.item_name === selectedItemName
+  );
+
+  if (selectedItem) {
+    const selectedBrand = brands.find(
+      (brand) => String(brand.id) === String(selectedItem.brand)
     );
-    if (selectedItem) {
-      const selectedBrand = brands.find(
-        (brand) => String(brand.id) === String(selectedItem.brand)
+    setBrand(selectedBrand ? selectedBrand.brand_name : "Brand Not Found");
+    setPrice(selectedItem.unit_price);
+
+    // Fetch available quantity for the selected item
+    try {
+      const quantityResponse = await axios.get(
+        `http://127.0.0.1:8001/purchases/total-quantity/${selectedItem.id}/`
       );
-      setBrand(selectedBrand ? selectedBrand.brand_name : "Brand Not Found");
-      setPrice(selectedItem.unit_price);
-    } else {
-      setBrand("No Item Selected");
-      setPrice("");
+
+      // Check if the response has the expected data format
+      if (
+        quantityResponse.data &&
+        quantityResponse.data.total_quantity !== undefined
+      ) {
+        setAvailableQuantity(
+          quantityResponse.data.total_quantity || "Not Available"
+        );
+      } else {
+        setAvailableQuantity("Quantity Not Found");
+      }
+    } catch (error) {
+      console.error("Error fetching available quantity:", error);
+      setAvailableQuantity("Error fetching quantity");
     }
-  };
+  } else {
+    // Reset states if no item is selected
+    setBrand("No Item Selected");
+    setPrice("");
+    setAvailableQuantity("");
+  }
+};
 
   const handleAddItem = () => {
     if (itemName && price && quantity) {
@@ -79,7 +107,7 @@ const SaleEntry = () => {
         setPurchaseDetails([
           ...purchaseDetails,
           {
-            item_name: itemName,
+            itemName,
             brand,
             price,
             quantity: parseInt(quantity, 10),
@@ -94,9 +122,9 @@ const SaleEntry = () => {
       setPrice("");
       setQuantity("");
       setTotal("");
+      setAvailableQuantity("");
     }
   };
-
   const handleDelete = (index) => {
     const itemToDelete = purchaseDetails[index];
     setSubTotal((prev) => prev - itemToDelete.total);
@@ -106,12 +134,20 @@ const SaleEntry = () => {
   };
 
   const handleSubmit = async () => {
+    const formattedPurchaseDetails = purchaseDetails.map((item) => ({
+      item_name: item.itemName,
+      brand_name: item.brand,
+      price: item.price,
+      quantity: item.quantity,
+      amount: item.total, // Use `amount` instead of `total`
+    }));
+
     const purchaseData = {
       invoice_no: invoiceNo,
       invoice_date: invoiceDate,
       supplier,
       total_amount: subTotal,
-      purchase_details: purchaseDetails,
+      purchase_details: formattedPurchaseDetails, // Use the formatted array
     };
 
     try {
@@ -125,7 +161,7 @@ const SaleEntry = () => {
         }
       );
       console.log("Purchase data submitted successfully:", response.data);
-      setSuccessMessage(response.data.message); // Display success message
+      setSuccessMessage(response.data.message);
       // Reset form after successful submission
       setInvoiceNo("");
       setInvoiceDate("");
@@ -136,11 +172,14 @@ const SaleEntry = () => {
       console.error("Error submitting purchase data:", error);
       setSuccessMessage("Failed to submit purchase data. Please try again.");
     }
+    setTimeout(() => {
+      navigate("/purchase-list");
+    }, 1000);
   };
 
   return (
     <div className="container mx-auto p-6">
-      <h2 className="text-3xl font-bold mb-6">Sales Entry</h2>
+      <h2 className="text-3xl font-bold mb-6">Sale Entry</h2>
       {successMessage && (
         <div className="text-green-500 font-semibold mb-4">
           {successMessage}
@@ -166,13 +205,13 @@ const SaleEntry = () => {
           />
         </div>
         <div>
-          <label className="block mb-2">Customer Name:</label>
+          <label className="block mb-2">Supplier Name:</label>
           <select
             value={supplier}
             onChange={handleSupplierChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
-            <option value="">Select Customer</option>
+            <option value="">Select Supplier</option>
             {suppliers.map((sup) => (
               <option
                 key={sup.id}
@@ -223,13 +262,13 @@ const SaleEntry = () => {
           <label className="block mb-2">Available Quantity:</label>
           <input
             type="text"
-            value={price}
+            value={availableQuantity} // Display available quantity
             readOnly
             className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
           />
         </div>
         <div>
-          <label className="block mb-2"> Quantity:</label>
+          <label className="block mb-2">Quantity:</label>
           <input
             type="number"
             value={quantity}
@@ -256,7 +295,7 @@ const SaleEntry = () => {
       >
         Add Item
       </button>
-      <h3 className="text-2xl font-bold mt-6">Sale Details</h3>
+      <h3 className="text-2xl font-bold mt-6">Purchase Details</h3>
       <table className="w-full border mt-4">
         <thead>
           <tr className="bg-gray-800 text-white">
@@ -302,4 +341,3 @@ const SaleEntry = () => {
 };
 
 export default SaleEntry;
-
