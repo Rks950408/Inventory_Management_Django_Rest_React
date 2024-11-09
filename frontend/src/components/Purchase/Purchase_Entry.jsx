@@ -79,7 +79,7 @@ const PurchaseEntry = () => {
         setPurchaseDetails([
           ...purchaseDetails,
           {
-            item_name: itemName,
+            itemName,
             brand,
             price,
             quantity: parseInt(quantity, 10),
@@ -105,38 +105,48 @@ const PurchaseEntry = () => {
     );
   };
 
-  const handleSubmit = async () => {
-    const purchaseData = {
-      invoice_no: invoiceNo,
-      invoice_date: invoiceDate,
-      supplier,
-      total_amount: subTotal,
-      purchase_details: purchaseDetails,
-    };
+const handleSubmit = async () => {
+  const formattedPurchaseDetails = purchaseDetails.map((item) => ({
+    item_name: item.itemName,
+    brand_name: item.brand,
+    price: item.price,
+    quantity: item.quantity,
+    amount: item.total, // Use `amount` instead of `total`
+  }));
 
-    try {
-      const response = await axios.post(
-        "http://127.0.0.1:8001/purchases/purchase-entry/",
-        purchaseData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log("Purchase data submitted successfully:", response.data);
-      setSuccessMessage(response.data.message); // Display success message
-      // Reset form after successful submission
-      setInvoiceNo("");
-      setInvoiceDate("");
-      setSupplier("");
-      setPurchaseDetails([]);
-      setSubTotal(0);
-    } catch (error) {
-      console.error("Error submitting purchase data:", error);
-      setSuccessMessage("Failed to submit purchase data. Please try again.");
-    }
+  const purchaseData = {
+    invoice_no: invoiceNo,
+    invoice_date: invoiceDate,
+    supplier,
+    total_amount: subTotal,
+    purchase_details: formattedPurchaseDetails, // Use the formatted array
   };
+
+  try {
+    const response = await axios.post(
+      "http://127.0.0.1:8001/purchases/purchase-entry/",
+      purchaseData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("Purchase data submitted successfully:", response.data);
+    setSuccessMessage(response.data.message);
+    // Reset form after successful submission
+    setInvoiceNo("");
+    setInvoiceDate("");
+    setSupplier("");
+    setPurchaseDetails([]);
+    setSubTotal(0);
+  } catch (error) {
+    console.error("Error submitting purchase data:", error);
+    setSuccessMessage("Failed to submit purchase data. Please try again.");
+  }
+};
+
+
 
   return (
     <div className="container mx-auto p-6">
@@ -291,5 +301,6 @@ const PurchaseEntry = () => {
     </div>
   );
 };
+
 
 export default PurchaseEntry;
