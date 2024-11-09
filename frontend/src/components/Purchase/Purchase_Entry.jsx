@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';  // Import useNavigate from react-router-dom
 
 const PurchaseEntry = () => {
+  const navigate = useNavigate(); // Initialize useNavigate
   const [invoiceNo, setInvoiceNo] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
   const [items, setItems] = useState([]);
@@ -105,48 +107,49 @@ const PurchaseEntry = () => {
     );
   };
 
-const handleSubmit = async () => {
-  const formattedPurchaseDetails = purchaseDetails.map((item) => ({
-    item_name: item.itemName,
-    brand_name: item.brand,
-    price: item.price,
-    quantity: item.quantity,
-    amount: item.total, // Use `amount` instead of `total`
-  }));
+  const handleSubmit = async () => {
+    const formattedPurchaseDetails = purchaseDetails.map((item) => ({
+      item_name: item.itemName,
+      brand_name: item.brand,
+      price: item.price,
+      quantity: item.quantity,
+      amount: item.total, // Use `amount` instead of `total`
+    }));
 
-  const purchaseData = {
-    invoice_no: invoiceNo,
-    invoice_date: invoiceDate,
-    supplier,
-    total_amount: subTotal,
-    purchase_details: formattedPurchaseDetails, // Use the formatted array
+    const purchaseData = {
+      invoice_no: invoiceNo,
+      invoice_date: invoiceDate,
+      supplier,
+      total_amount: subTotal,
+      purchase_details: formattedPurchaseDetails, // Use the formatted array
+    };
+
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8001/purchases/purchase-entry/",
+        purchaseData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Purchase data submitted successfully:", response.data);
+      setSuccessMessage(response.data.message);
+      // Reset form after successful submission
+      setInvoiceNo("");
+      setInvoiceDate("");
+      setSupplier("");
+      setPurchaseDetails([]);
+      setSubTotal(0);
+    } catch (error) {
+      console.error("Error submitting purchase data:", error);
+      setSuccessMessage("Failed to submit purchase data. Please try again.");
+    }
+    setTimeout(() => {
+      navigate("/purchase-list");
+    }, 1000);
   };
-
-  try {
-    const response = await axios.post(
-      "http://127.0.0.1:8001/purchases/purchase-entry/",
-      purchaseData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log("Purchase data submitted successfully:", response.data);
-    setSuccessMessage(response.data.message);
-    // Reset form after successful submission
-    setInvoiceNo("");
-    setInvoiceDate("");
-    setSupplier("");
-    setPurchaseDetails([]);
-    setSubTotal(0);
-  } catch (error) {
-    console.error("Error submitting purchase data:", error);
-    setSuccessMessage("Failed to submit purchase data. Please try again.");
-  }
-};
-
-
 
   return (
     <div className="container mx-auto p-6">
