@@ -2,11 +2,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum
-from .serializers import SaleMasterSerializer,SaleMasterSerializer1
-from .serializers import PurchaseMasterSerializer,PurchaseMasterSerializer1,PurchaseMasterSerializer2
+from .serializers import SaleMasterSerializer,SaleMasterSerializer1,SaleDetailsSerializer2
+from .serializers import PurchaseMasterSerializer,PurchaseMasterSerializer1,PurchaseMasterSerializer2,PurchaseDetailsSerializer2
 from .models import PurchaseMaster,PurchaseDetails,SaleDetails,SaleMaster,Item
 from django.db.models import Sum
 from django.db import connection
+from django.utils import timezone
+from django.db.models import Q  # For filtering
 
 
 @api_view(['POST'])
@@ -165,3 +167,31 @@ def stock_list(request):
 
     # Return the results as JSON
     return Response({'stock_data': stock_data})
+
+# details stock by date range
+@api_view(['GET'])
+def details_sale_purchase(request):
+    from_date = request.GET.get('from_date')
+    to_date = request.GET.get('to_date')
+    selected_item = request.GET.get('item', 'all')
+    selected_type = request.GET.get('type', 'purchase')
+
+    items = None
+    if from_date and to_date:
+        from_date = timezone.datetime.strptime(from_date, '%Y-%m-%d')
+        to_date = timezone.datetime.strptime(to_date, '%Y-%m-%d')
+
+        if selected_type == 'purchase':
+            items = PurchaseDetails.objects.filter(datetime__range=(from_date, to_date))
+            if selected_item != 'all':
+                items = items.filter(item__item_name=selected_item)
+            serializer = PurchaseDetailsSerializer2(items, many=True)
+        else:  # selected_type == 'sale'
+            items = SaleDetails.objects.filter(datetime__range=(from_date, to_date))
+            if selected_item != 'all':
+                items = items.filter(item__item_name=selected_item)
+            serializer = SaleDetailsSerializer2(items, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    return Response({"error": "Invalid date range."}, status=status.HTTP_400_BAD_REQUEST)

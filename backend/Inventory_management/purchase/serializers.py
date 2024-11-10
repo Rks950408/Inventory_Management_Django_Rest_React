@@ -190,3 +190,26 @@ class SaleMasterSerializer1(serializers.ModelSerializer):
     class Meta:
         model = SaleMaster
         fields = ['id', 'invoice_no', 'invoice_date', 'total_amount', 'customer', 'sale_details']
+
+
+# details for 
+class PurchaseDetailsSerializer2(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.item_name')  # Add item name from Item model
+    total_price = serializers.SerializerMethodField()  # Add a field to calculate total_price
+    supplier_name= serializers.CharField(source='purchase_master.supplier')  # Adjust 'name' to the correct field in Supplier
+    class Meta:
+        model = PurchaseDetails
+        fields = ['id', 'item_name', 'price', 'quantity', 'total_price', 'datetime', 'supplier_name']
+
+    def get_total_price(self, obj):
+        return obj.price * obj.quantity if obj.price and obj.quantity else 0  # Calculate total price
+
+
+class SaleDetailsSerializer2(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.item_name')  # Add item name from Item model
+    total_amount = serializers.FloatField(source='amount')  # Alias for amount
+    customer_name = serializers.CharField(source='sale_master.customer')  # Adjust for customer name in SaleMaster
+
+    class Meta:
+        model = SaleDetails
+        fields = ['id', 'item_name', 'quantity', 'brand_name', 'price', 'amount', 'datetime', 'status', 'sale_master', 'total_amount', 'customer_name']

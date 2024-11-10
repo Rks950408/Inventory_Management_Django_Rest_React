@@ -16,6 +16,7 @@ urlpatterns = [
     path('sale-details/<int:sale_master_id>/', views.get_sale_details_by_master_id, name='get_sale_details_by_master_id'),
 
     path('stock-list/', views.stock_list, name='stock_list_api'),
+    path('details_sale_purchase/', views.details_sale_purchase, name='details_sale_purchase'),
 
 
 
