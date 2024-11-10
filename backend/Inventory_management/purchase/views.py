@@ -4,7 +4,10 @@ from rest_framework import status
 from django.db.models import Sum
 from .serializers import SaleMasterSerializer,SaleMasterSerializer1
 from .serializers import PurchaseMasterSerializer,PurchaseMasterSerializer1,PurchaseMasterSerializer2
-from .models import PurchaseMaster,PurchaseDetails,SaleDetails,SaleMaster
+from .models import PurchaseMaster,PurchaseDetails,SaleDetails,SaleMaster,Item
+from django.db.models import Sum
+from django.db import connection
+
 
 @api_view(['POST'])
 def create_purchase(request):
@@ -109,3 +112,56 @@ def get_sale_details_by_master_id(request, sale_master_id):
     
     except SaleMaster.DoesNotExist:
         return Response({"error": "SaleMaster not found for the given ID"}, status=status.HTTP_404_NOT_FOUND)
+    
+
+
+# details stock
+@api_view(['GET'])
+def stock_list(request):
+    # Retrieve filter parameters from the request
+    item_id = request.GET.get('item', None)
+    search_query = request.GET.get('search', '').strip()
+
+    # Define the base query
+    base_query = '''
+        WITH purchase_data AS (
+            SELECT item_id, SUM(quantity) AS total_purchase_price
+            FROM public.purchase_details
+            GROUP BY item_id
+        ),
+        sale_data AS (
+            SELECT item_id, SUM(quantity) AS total_sale_price
+            FROM public.sale_details
+            GROUP BY item_id
+        )
+        SELECT 
+            item.id,
+            item.item_name,
+            COALESCE(sale_data.total_sale_price, 0) AS total_sale_price,
+            COALESCE(purchase_data.total_purchase_price, 0) AS total_purchase_price,
+            CAST(COALESCE(purchase_data.total_purchase_price, 0) - COALESCE(sale_data.total_sale_price, 0) AS INTEGER) AS available_quantity
+        FROM 
+            public.item_master item
+        LEFT JOIN 
+            purchase_data ON item.id = purchase_data.item_id
+        LEFT JOIN 
+            sale_data ON item.id = sale_data.item_id
+    '''
+
+    # Add conditions for item ID and search query if present
+    conditions = []
+    if item_id:
+        conditions.append(f"item.id = {item_id}")
+    if search_query:
+        conditions.append(f"item.item_name ILIKE '%{search_query}%'")
+
+    if conditions:
+        base_query += ' WHERE ' + ' AND '.join(conditions)
+
+    # Execute the query and fetch the results
+    with connection.cursor() as cursor:
+        cursor.execute(base_query)
+        stock_data = cursor.fetchall()
+
+    # Return the results as JSON
+    return Response({'stock_data': stock_data})

@@ -15,6 +15,9 @@ urlpatterns = [
     # Endpoint to get sale details by Sale Master ID
     path('sale-details/<int:sale_master_id>/', views.get_sale_details_by_master_id, name='get_sale_details_by_master_id'),
 
+    path('stock-list/', views.stock_list, name='stock_list_api'),
+
+
 
 
 ]
