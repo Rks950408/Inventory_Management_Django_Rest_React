@@ -84,7 +84,7 @@ class SaleDetails(models.Model):
     amount = models.FloatField(blank=True, null=True)
     datetime = models.DateTimeField(default=timezone.now)
     status = models.BooleanField(default=True)
-    sale_master = models.ForeignKey(SaleMaster, on_delete=models.CASCADE) 
+    sale_master = models.ForeignKey(SaleMaster, on_delete=models.CASCADE,related_name='sale_details') 
 
     def __str__(self):
         return f"{self.item} - {self.sale_master}"

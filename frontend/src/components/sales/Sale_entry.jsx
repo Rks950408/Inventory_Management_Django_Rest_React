@@ -198,7 +198,7 @@ const handleItemChange = async (selectedItemName) => {
 
     // Navigate to the purchase list after a short delay
     setTimeout(() => {
-      navigate("/purchase-list");
+      navigate("/sale-list");
     }, 1000);
   };
 

@@ -136,3 +136,57 @@ class SaleMasterSerializer(serializers.ModelSerializer):
             )
 
         return sale_master
+
+
+# ------------------------second---------------------
+# Serializer for SaleDetails
+# class SaleDetailsSerializer1(serializers.ModelSerializer):
+#     item_name = serializers.CharField(write_only=True)  # Accepts item name from frontend
+
+#     class Meta:
+#         model = SaleDetails
+#         fields = ['item_name', 'brand_name', 'quantity', 'price', 'amount', 'status']
+
+#     def validate_item_name(self, value):
+#         try:
+#             item = Item.objects.get(item_name=value)  # Convert item_name to item instance
+#             return item
+#         except Item.DoesNotExist:
+#             raise serializers.ValidationError(f"Item '{value}' not found.")
+
+#     def create(self, validated_data):
+#         item_instance = validated_data.pop('item_name')  # Replace item_name with item instance
+#         sale_detail = SaleDetails.objects.create(item=item_instance, **validated_data)
+#         return sale_detail
+
+# class SaleMasterSerializer1(serializers.ModelSerializer):
+#     sale_details = SaleDetailsSerializer1(many=True)  # Nested serializer for SaleDetails
+
+#     class Meta:
+#         model = SaleMaster
+#         fields = ['id', 'invoice_no', 'invoice_date', 'total_amount', 'sale_details']  # Correct the field name to invoice_date
+
+
+class SaleDetailsSerializer1(serializers.ModelSerializer):
+    # Retrieve the item_name from the related Item object
+    item_name = serializers.CharField(source='item.item_name', read_only=True)
+
+    class Meta:
+        model = SaleDetails
+        fields = ['item_name', 'brand_name', 'quantity', 'price', 'amount', 'status']
+
+
+class SupplierSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Supplier  # Assuming the Supplier model has fields like id, name, contact, etc.
+        fields = ['id', 'name', 'contact', 'address', 'status', 'entry_date']
+
+
+class SaleMasterSerializer1(serializers.ModelSerializer):
+    # Nested serializer for the customer/supplier details
+    customer = SupplierSerializer(read_only=True)
+    sale_details = SaleDetailsSerializer1(many=True)  # Nested serializer for SaleDetails
+
+    class Meta:
+        model = SaleMaster
+        fields = ['id', 'invoice_no', 'invoice_date', 'total_amount', 'customer', 'sale_details']

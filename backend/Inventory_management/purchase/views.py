@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum
-from .serializers import SaleMasterSerializer
+from .serializers import SaleMasterSerializer,SaleMasterSerializer1
 from .serializers import PurchaseMasterSerializer,PurchaseMasterSerializer1,PurchaseMasterSerializer2
 from .models import PurchaseMaster,PurchaseDetails,SaleDetails,SaleMaster
 
@@ -46,6 +46,8 @@ def get_purchase_details_by_master_id(request, purchase_master_id):
     except PurchaseMaster.DoesNotExist:
         return Response({"error": "PurchaseMaster not found for the given ID"}, status=status.HTTP_404_NOT_FOUND)
     
+# sales for all api:--------------------------------
+    
 @api_view(['GET'])
 def get_total_quantity_for_item(request, item_id):
     try:
@@ -80,3 +82,30 @@ def create_sale(request):
 
     # Return error messages if data is invalid
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_sale_master(request):
+    try:
+        # Fetch all SaleMaster entries and prefetch related SaleDetails
+        sales = SaleMaster.objects.all()
+
+        # Serialize the data using SaleMasterSerializer1
+        serializer = SaleMasterSerializer1(sales, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_sale_details_by_master_id(request, sale_master_id):
+    try:
+        # Retrieve the SaleMaster record
+        sale_master = SaleMaster.objects.get(id=sale_master_id)
+        
+        # Serialize the SaleMaster with its related SaleDetails and Supplier details
+        serializer = SaleMasterSerializer1(sale_master)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    except SaleMaster.DoesNotExist:
+        return Response({"error": "SaleMaster not found for the given ID"}, status=status.HTTP_404_NOT_FOUND)
