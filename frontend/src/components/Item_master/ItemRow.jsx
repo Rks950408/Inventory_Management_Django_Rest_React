@@ -25,7 +25,7 @@ const ItemRow = ({ item, index, onDelete }) => {
       <td className="py-2 px-4 border-b">{index + 1}</td>
       <td className="py-2 px-4 border-b">{item.item_name}</td>
       <td className="py-2 px-4 border-b">{item.category}</td>
-      <td className="py-2 px-4 border-b">{item.brand}</td>
+      <td className="py-2 px-4 border-b">{item.brand_name}</td>
       <td className="py-2 px-4 border-b">{item.unit_price}</td>
       <td className="py-2 px-4 border-b">
         {item.image ? (

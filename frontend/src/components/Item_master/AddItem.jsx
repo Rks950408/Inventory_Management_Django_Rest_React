@@ -136,22 +136,21 @@ const AddItem = () => {
             Brand Name:
           </label>
           <select
-            name="brand"
-            id="brand"
-            value={formData.brand} // This will store the brand ID (foreign key)
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-            required
-          >
-            <option value="">Select a brand</option>
-            {brands.map((brand) => (
-              <option key={brand.id} value={brand.id}>
-                {" "}
-                {/* Brand ID as value */}
-                {brand.brand_name} {/* Brand name displayed */}
-              </option>
-            ))}
-          </select>
+  name="brand"
+  id="brand"
+  value={formData.brand} // Stores the selected brand ID (foreign key)
+  onChange={handleChange}
+  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+  required
+>
+  <option value="">Select a brand</option>
+  {brands.map((brand) => (
+    <option key={brand.id} value={brand.id}>
+      {brand.brand_name} {/* Display brand name */}
+    </option>
+  ))}
+</select>
+
         </div>
 
         {/* Category */}
