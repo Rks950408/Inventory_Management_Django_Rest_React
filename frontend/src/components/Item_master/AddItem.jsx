@@ -85,7 +85,7 @@ const AddItem = () => {
        setMessage("Item added successfully!");
        setTimeout(() => navigate("/item"), 1000); // Redirect after 2 seconds
      } else {
-       setMessage(`Error: ${data.message || "Failed to add item."}`);
+       setMessage(`Error: ${data.message || "This Item is already Exist."}`);
      }
    } catch (error) {
      setMessage("Error: Something went wrong.");

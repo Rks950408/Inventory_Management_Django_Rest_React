@@ -15,18 +15,48 @@ from .serializers import *
 def create_item(request):
     """Create a new item."""
     print("Request Data:", request.data)  # Log request data to debug
+    
+    # Check if item with the same name already exists (case-insensitive)
+    item_name = request.data.get('item_name', '').strip().lower()  # Convert to lowercase for case-insensitive comparison
+    if Item.objects.filter(item_name__iexact=item_name).exists():
+        return Response(
+            {"detail": "Item with this name already exists."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # If item does not exist, proceed to create the item
     serializer = ItemSerializer(data=request.data)
     if serializer.is_valid():
+        # Save the new item with status set to True
         serializer.save(status=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    # Return validation errors if the serializer is invalid
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
 def get_items(request):
-    """Retrieve all items where status is True (active)."""
+    """Retrieve all items where status is True (active), with optional search and pagination."""
+    
+    # Apply filtering if search query is provided
+    search_query = request.query_params.get('search', '')
     items = Item.objects.filter(status=True)  # Only active items
+    
+    if search_query:
+        items = items.filter(item_name__icontains=search_query)  # Search for items by name (case-insensitive)
+
+    # Pagination (optional)
+    page = request.query_params.get('page', 1)
+    items_per_page = 10  # Number of items per page
+    start_index = (int(page) - 1) * items_per_page
+    end_index = start_index + items_per_page
+    items = items[start_index:end_index]
+    
+    # Serialize the data
     serializer = ItemSerializer(items, many=True)
+    
+    # Return the response with paginated data
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 

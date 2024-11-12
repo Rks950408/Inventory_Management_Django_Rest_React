@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import ItemRow from "./ItemRow";
 
 const ItemList = () => {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState([]); // Initialize as an empty array
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     // Fetch items from your API endpoint
@@ -14,25 +16,35 @@ const ItemList = () => {
         );
         if (response.ok) {
           const data = await response.json();
-          setItems(data);
+          console.log("Fetched data:", data); // Log the fetched data for debugging
+          // Ensure data is always an array
+          setItems(Array.isArray(data) ? data : []);
         } else {
           console.error("Failed to fetch items:", response.status);
+          setItems([]);  // Set to empty array if the response is not ok
         }
       } catch (error) {
         console.error("Error fetching items:", error);
+        setItems([]);  // Set to empty array if error occurs
       }
     };
+
     fetchItems();
-  }, [searchQuery]);
+  }, [searchQuery]); // Runs the effect when the search query changes
 
   const handleSearch = (e) => {
     e.preventDefault();
+    setCurrentPage(1);  // Reset to the first page when a new search is made
     setSearchQuery(e.target.search.value);
   };
 
   const handleDeleteItem = (itemId) => {
     // Remove the deleted item from the state
     setItems(items.filter((item) => item.id !== itemId));
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -46,7 +58,8 @@ const ItemList = () => {
             name="search"
             className="form-input w-96 border border-gray-300 rounded-l-md p-2"
             placeholder="Search items..."
-            defaultValue={searchQuery}
+            value={searchQuery}  // Make it controlled
+            onChange={(e) => setSearchQuery(e.target.value)}  // Add onChange to update state
           />
           <button
             className="btn bg-blue-500 text-white rounded-r-md p-2"
@@ -70,7 +83,7 @@ const ItemList = () => {
           </tr>
         </thead>
         <tbody>
-          {items.length > 0 ? (
+          {Array.isArray(items) && items.length > 0 ? (
             items.map((item, index) => (
               <ItemRow
                 key={item.id}
@@ -88,6 +101,29 @@ const ItemList = () => {
           )}
         </tbody>
       </table>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-center mt-4">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="btn bg-gray-300 text-white rounded p-2 mr-2"
+        >
+          Prev
+        </button>
+        <span className="my-auto text-lg">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="btn bg-gray-300 text-white rounded p-2 ml-2"
+        >
+          Next
+        </button>
+      </div>
+
+      {/* Add Item Button */}
       <div className="flex justify-center mt-4">
         <a
           href="/add-item"
