@@ -17,6 +17,7 @@ import SaleDetails from './components/sales/SaleDetails.jsx';
 import AddSupplier from './components/Supplier/Add_Supplier.jsx';
 import SupplierList from './components/Supplier/Supplier_list.jsx';
 import UpdateItem from './components/Item_master/UpdateItem.jsx';
+import Dashboard from './components/Dashboard/Dashboard.jsx';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         {/* <Sidebar /> */}
         <div className="content flex-1 p-4">
           <Routes>
+            <Route path="/" element={<Dashboard />} />
             <Route path="/item" element={<ItemList />} />
             <Route path="/add-item" element={<AddItem />} />
             <Route path="/brands" element={<BrandList />} />

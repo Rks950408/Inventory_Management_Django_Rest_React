@@ -101,25 +101,32 @@ const ItemList = () => {
       </table>
 
       {/* Pagination Controls */}
-      <div className="flex justify-center mt-4">
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="btn bg-gray-300 text-white rounded p-2 mr-2"
-        >
-          Prev
-        </button>
-        <span className="my-auto text-lg">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="btn bg-gray-300 text-white rounded p-2 ml-2"
-        >
-          Next
-        </button>
-      </div>
+      <div className="flex justify-between items-center mt-4">
+  <button
+    onClick={() => handlePageChange(currentPage - 1)}
+    disabled={currentPage === 0}
+    className={`btn text-white rounded p-2 ${
+      currentPage === 1 ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500"
+    }`}
+  >
+    Prev
+  </button>
+
+  <span className="my-auto text-lg">
+    Page {currentPage} of {totalPages}
+  </span>
+
+  <button
+    onClick={() => handlePageChange(currentPage + 1)}
+    disabled={currentPage === totalPages}
+    className={`btn text-white rounded p-2 ${
+      currentPage === totalPages ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500"
+    }`}
+  >
+    Next
+  </button>
+       </div>
+
 
       {/* Add Item Button */}
       <div className="flex justify-center mt-4">

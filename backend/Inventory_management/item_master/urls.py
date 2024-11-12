@@ -14,4 +14,6 @@ urlpatterns = [
     path('items/<int:item_id>/', views.get_item, name='get_item'),
     path('items/<int:item_id>/update/', views.update_item, name='update_item'),
     path('items/<int:item_id>/delete/', views.delete_item, name='delete_item'),
+    path('item-dashboard/', views.get_item_dashboard, name='item-dashboard'),
+
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -108,3 +108,15 @@ def get_brand(request):
     brands = BrandMaster.objects.all()  
     serializer = BrandMasterSerializer(brands, many=True)  
     return Response(serializer.data)  
+
+
+@api_view(['GET'])
+def get_item_dashboard(request):
+    item_active = Item.objects.filter(status=True).count()
+
+    item_inactive = Item.objects.filter(status=False).count()
+
+    return Response({
+        'item_active': item_active,
+        'item_inactive': item_inactive
+    })
