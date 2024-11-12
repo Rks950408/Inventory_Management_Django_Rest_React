@@ -6,15 +6,14 @@ const AddItem = () => {
 
   const [formData, setFormData] = useState({
     item_name: "",
-    brand: "", // This will store the brand ID (foreign key)
+    brand: "", 
     category: "",
-    unit_price: "", // Keep this as a string until conversion to number
+    unit_price: "", 
     image: null,
   });
   const [message, setMessage] = useState("");
-  const [brands, setBrands] = useState([]); // State to hold brand data
+  const [brands, setBrands] = useState([]); 
 
-  // Fetch brands from backend on component mount
   useEffect(() => {
     const fetchBrands = async () => {
       try {
@@ -25,14 +24,14 @@ const AddItem = () => {
           throw new Error("Failed to fetch brands");
         }
         const data = await response.json();
-        setBrands(data); // Set the fetched brand data to state
+        setBrands(data); 
       } catch (error) {
         setMessage("Error fetching brands: " + error.message);
       }
     };
 
     fetchBrands();
-  }, []); // Empty dependency array ensures this runs only once when the component mounts
+  }, []); 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +52,6 @@ const AddItem = () => {
    e.preventDefault();
    const form = new FormData();
 
-   // Log form data before submission to confirm the brand ID
    console.log("Form Data Before Submit:", formData);
 
    form.append("item_name", formData.item_name);
@@ -61,11 +59,10 @@ const AddItem = () => {
    form.append("unit_price", formData.unit_price);
    if (formData.image) form.append("image", formData.image);
 
-   // Check if brand is selected, ensure it's a valid number
    if (formData.brand && !isNaN(formData.brand)) {
-     const brandId = parseInt(formData.brand, 10); // Convert to integer (brand ID)
-     console.log("Converted Brand ID:", brandId); // Debugging: Log the brand ID
-     form.append("brand", brandId); // Append brand ID to form data
+     const brandId = parseInt(formData.brand, 10); 
+     console.log("Converted Brand ID:", brandId); 
+     form.append("brand", brandId); 
    } else {
      setMessage("Please select a valid brand.");
      return;
@@ -83,7 +80,7 @@ const AddItem = () => {
 
      if (response.ok) {
        setMessage("Item added successfully!");
-       setTimeout(() => navigate("/item"), 1000); // Redirect after 2 seconds
+       setTimeout(() => navigate("/item"), 1000); 
      } else {
        setMessage(`Error: ${data.message || "This Item is already Exist."}`);
      }

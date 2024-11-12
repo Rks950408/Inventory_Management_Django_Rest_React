@@ -18,7 +18,7 @@ const AddBrand = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ brand_name: brandName }), // Sending brand_name in the body
+                body: JSON.stringify({ brand_name: brandName }), 
             });
 
             const data = await response.json();

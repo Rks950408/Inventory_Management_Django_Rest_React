@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';  // Import useNavigate from react-router-dom
+import { useNavigate } from 'react-router-dom';  
 
 const PurchaseEntry = () => {
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate(); 
   const [invoiceNo, setInvoiceNo] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
   const [items, setItems] = useState([]);
@@ -17,7 +17,7 @@ const PurchaseEntry = () => {
   const [brands, setBrands] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [supplier, setSupplier] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); // New state for success message
+  const [successMessage, setSuccessMessage] = useState(""); 
 
   useEffect(() => {
     axios
@@ -113,7 +113,7 @@ const PurchaseEntry = () => {
       brand_name: item.brand,
       price: item.price,
       quantity: item.quantity,
-      amount: item.total, // Use `amount` instead of `total`
+      amount: item.total, 
     }));
 
     const purchaseData = {
@@ -121,7 +121,7 @@ const PurchaseEntry = () => {
       invoice_date: invoiceDate,
       supplier,
       total_amount: subTotal,
-      purchase_details: formattedPurchaseDetails, // Use the formatted array
+      purchase_details: formattedPurchaseDetails, 
     };
 
     try {

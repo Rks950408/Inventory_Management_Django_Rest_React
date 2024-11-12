@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { FaCalendarAlt } from "react-icons/fa";
-import axios from "axios"; // Add axios for making API calls
+import axios from "axios"; 
 
 const DetailedList = () => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [item, setItem] = useState("All");
   const [type, setType] = useState("Purchase");
-  const [data, setData] = useState([]); // State to store API response data
-  const [items, setItems] = useState([]); // State to store items list
-  const [loading, setLoading] = useState(false); // Loading state for API requests
-  const [error, setError] = useState(null); // Error state
-
+  const [data, setData] = useState([]); 
+  const [items, setItems] = useState([]); 
+  const [loading, setLoading] = useState(false); 
+  const [error, setError] = useState(null); 
   // Fetch items from the API
   useEffect(() => {
     const fetchItems = async () => {
@@ -19,7 +18,7 @@ const DetailedList = () => {
         const response = await axios.get(
           "http://127.0.0.1:8001/items_master/items/"
         );
-        setItems(response.data); // Set the items data
+        setItems(response.data); 
       } catch (error) {
         console.error("Error fetching items:", error);
         setError("Error fetching items.");
@@ -29,13 +28,11 @@ const DetailedList = () => {
     fetchItems();
   }, []);
 
-  // Handle the search functionality
   const handleSearch = async () => {
-    setLoading(true); // Start loading
-    setError(null); // Reset error state
+    setLoading(true); 
+    setError(null); 
 
     try {
-      // Construct the API endpoint with query parameters
       const apiUrl = `http://127.0.0.1:8001/purchases/details_sale_purchase/?from_date=${fromDate}&to_date=${toDate}&type=${type.toLowerCase()}&item=${item}`;
 
       // Fetch the data from the API
@@ -47,7 +44,7 @@ const DetailedList = () => {
       console.error("Error fetching data:", error);
       setError("Error fetching data.");
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false); 
     }
   };
 

@@ -7,7 +7,6 @@ const PurchasesList = () => {
   const [purchaseData, setPurchaseData] = useState([]);
 
   useEffect(() => {
-    // Fetch data from the API for the purchases list
     axios
       .get("http://127.0.0.1:8001/purchases/purchases-get/")
       .then((response) => {
@@ -19,15 +18,13 @@ const PurchasesList = () => {
   }, []);
 
   const handlePurchaseRedirect = () => {
-    navigate("/purchase"); // Redirect to the "add-purchase" page
+    navigate("/purchase"); 
   };
 
   const handleViewClick = (id) => {
-    // Fetch purchase details by id and redirect to the details page
     axios
       .get(`http://127.0.0.1:8001/purchases/purchases/${id}/`)
       .then((response) => {
-        // You can save this data to state or directly use it on the details page
         navigate(`/purchase-details/${id}`, {
           state: { purchaseDetails: response.data },
         });
@@ -43,7 +40,7 @@ const PurchasesList = () => {
 
       <div className="mb-4">
         <button
-          onClick={handlePurchaseRedirect} // Trigger the redirection
+          onClick={handlePurchaseRedirect} 
           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
         >
           Purchase Item
@@ -71,7 +68,7 @@ const PurchasesList = () => {
               <td className="px-4 py-2 border-b">₹ {purchase.total_amount}</td>
               <td className="px-4 py-2 border-b">
                 <button
-                  onClick={() => handleViewClick(purchase.id)} // Pass purchase id to the handler
+                  onClick={() => handleViewClick(purchase.id)} 
                   className="px-4 py-1 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition"
                 >
                   View

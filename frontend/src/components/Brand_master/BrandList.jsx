@@ -18,7 +18,7 @@ const BrandList = () => {
 
     useEffect(() => {
         fetchBrands();
-    }, []); // Fetch brands on component mount
+    }, []); 
 
     return (
         <div className="container mx-auto mt-5">

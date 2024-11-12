@@ -3,18 +3,17 @@ import { useNavigate, useParams } from "react-router-dom";
 
 const UpdateItem = () => {
   const navigate = useNavigate();
-  const { id } = useParams();  // Get item ID from the URL
+  const { id } = useParams();  
   const [formData, setFormData] = useState({
     item_name: "",
-    brand: "", // This will store the brand ID (foreign key)
+    brand: "", 
     category: "",
-    unit_price: "", // Keep this as a string until conversion to number
+    unit_price: "", 
     image: null,
   });
   const [message, setMessage] = useState("");
-  const [brands, setBrands] = useState([]); // State to hold brand data
+  const [brands, setBrands] = useState([]); 
 
-  // Fetch brands from backend on component mount
   useEffect(() => {
     const fetchBrands = async () => {
       try {
@@ -25,16 +24,16 @@ const UpdateItem = () => {
           throw new Error("Failed to fetch brands");
         }
         const data = await response.json();
-        setBrands(data); // Set the fetched brand data to state
+        setBrands(data); 
       } catch (error) {
         setMessage("Error fetching brands: " + error.message);
       }
     };
 
     fetchBrands();
-  }, []); // Empty dependency array ensures this runs only once when the component mounts
+  }, []); 
 
-  // Fetch item data based on the ID
+  
   useEffect(() => {
     const fetchItem = async () => {
       try {
@@ -47,10 +46,10 @@ const UpdateItem = () => {
         const data = await response.json();
         setFormData({
           item_name: data.item_name,
-          brand: data.brand.id,  // Assuming the response includes the brand object
+          brand: data.brand.id,  
           category: data.category,
           unit_price: data.unit_price,
-          image: null,  // You can decide if you want to show the existing image
+          image: null,  
         });
       } catch (error) {
         setMessage("Error fetching item: " + error.message);
@@ -58,7 +57,7 @@ const UpdateItem = () => {
     };
 
     fetchItem();
-  }, [id]);  // Fetch item when the `id` changes (i.e., when the user clicks Edit)
+  }, [id]);  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -79,7 +78,6 @@ const UpdateItem = () => {
     e.preventDefault();
     const form = new FormData();
 
-    // Log form data before submission to confirm the brand ID
     console.log("Form Data Before Submit:", formData);
 
     form.append("item_name", formData.item_name);
@@ -87,11 +85,10 @@ const UpdateItem = () => {
     form.append("unit_price", formData.unit_price);
     if (formData.image) form.append("image", formData.image);
 
-    // Check if brand is selected, ensure it's a valid number
     if (formData.brand && !isNaN(formData.brand)) {
-      const brandId = parseInt(formData.brand, 10); // Convert to integer (brand ID)
-      console.log("Converted Brand ID:", brandId); // Debugging: Log the brand ID
-      form.append("brand", brandId); // Append brand ID to form data
+      const brandId = parseInt(formData.brand, 10); 
+      console.log("Converted Brand ID:", brandId); 
+      form.append("brand", brandId); 
     } else {
       setMessage("Please select a valid brand.");
       return;
@@ -99,7 +96,7 @@ const UpdateItem = () => {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8001/items_master/items/${id}/update/`,  // Assuming the API is set up for updating with the item ID
+        `http://127.0.0.1:8001/items_master/items/${id}/update/`,  
         {
           method: "PUT",
           body: form,
@@ -109,7 +106,7 @@ const UpdateItem = () => {
 
       if (response.ok) {
         setMessage("Item updated successfully!");
-        setTimeout(() => navigate("/item"), 1000); // Redirect after 2 seconds
+        setTimeout(() => navigate("/item"), 1000); 
       } else {
         setMessage(`Error: ${data.message || "Something went wrong."}`);
       }
@@ -160,7 +157,7 @@ const UpdateItem = () => {
           <select
             name="brand"
             id="brand"
-            value={formData.brand} // Stores the selected brand ID (foreign key)
+            value={formData.brand} 
             onChange={handleChange}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
             required
@@ -168,7 +165,7 @@ const UpdateItem = () => {
             <option value="">Select a brand</option>
             {brands.map((brand) => (
               <option key={brand.id} value={brand.id}>
-                {brand.brand_name} {/* Display brand name */}
+                {brand.brand_name} 
               </option>
             ))}
           </select>

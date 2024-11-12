@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ItemRow from "./ItemRow";
 
 const ItemList = () => {
-  const [items, setItems] = useState([]); // Initialize as an empty array
+  const [items, setItems] = useState([]); 
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -16,30 +16,28 @@ const ItemList = () => {
         );
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched data:", data); // Log the fetched data for debugging
-          // Ensure data is always an array
+          console.log("Fetched data:", data); 
           setItems(Array.isArray(data) ? data : []);
         } else {
           console.error("Failed to fetch items:", response.status);
-          setItems([]);  // Set to empty array if the response is not ok
+          setItems([]);  
         }
       } catch (error) {
         console.error("Error fetching items:", error);
-        setItems([]);  // Set to empty array if error occurs
+        setItems([]);  
       }
     };
 
     fetchItems();
-  }, [searchQuery]); // Runs the effect when the search query changes
+  }, [searchQuery]); 
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setCurrentPage(1);  // Reset to the first page when a new search is made
+    setCurrentPage(1);  
     setSearchQuery(e.target.search.value);
   };
 
   const handleDeleteItem = (itemId) => {
-    // Remove the deleted item from the state
     setItems(items.filter((item) => item.id !== itemId));
   };
 
@@ -58,8 +56,8 @@ const ItemList = () => {
             name="search"
             className="form-input w-96 border border-gray-300 rounded-l-md p-2"
             placeholder="Search items..."
-            value={searchQuery}  // Make it controlled
-            onChange={(e) => setSearchQuery(e.target.value)}  // Add onChange to update state
+            value={searchQuery}  
+            onChange={(e) => setSearchQuery(e.target.value)}  
           />
           <button
             className="btn bg-blue-500 text-white rounded-r-md p-2"

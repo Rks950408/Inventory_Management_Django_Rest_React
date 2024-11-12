@@ -3,11 +3,10 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 
 const PurchaseDetails = () => {
-  const { id } = useParams(); // Get the purchase ID from the URL
+  const { id } = useParams(); 
   const [purchaseDetails, setPurchaseDetails] = useState(null);
 
   useEffect(() => {
-    // Fetch purchase details by id
     axios
       .get(`http://127.0.0.1:8001/purchases/purchases/${id}/`)
       .then((response) => {
