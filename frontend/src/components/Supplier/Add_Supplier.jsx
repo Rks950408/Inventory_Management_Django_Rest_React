@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const Add_Supplier = () => {
+const AddSupplier = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -109,4 +109,4 @@ const Add_Supplier = () => {
   );
 };
 
-export default Add_Supplier;
+export default AddSupplier;

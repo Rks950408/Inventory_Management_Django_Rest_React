@@ -231,7 +231,7 @@ const handleItemChange = async (selectedItemName) => {
           />
         </div>
         <div>
-          <label className="block mb-2">Supplier Name:</label>
+          <label className="block mb-2">Customer Name:</label>
           <select
             value={supplier}
             onChange={handleSupplierChange}
