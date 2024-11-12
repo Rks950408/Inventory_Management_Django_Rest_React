@@ -7,31 +7,23 @@ from django.shortcuts import get_object_or_404
 from .models import BrandMaster
 from .serializers import *
 
-
-# Item master views post api get api delete and update
-
-
 @api_view(['POST'])
 def create_item(request):
     """Create a new item."""
-    print("Request Data:", request.data)  # Log request data to debug
+    print("Request Data:", request.data)  
     
-    # Check if item with the same name already exists (case-insensitive)
-    item_name = request.data.get('item_name', '').strip().lower()  # Convert to lowercase for case-insensitive comparison
+    item_name = request.data.get('item_name', '').strip().lower()  
     if Item.objects.filter(item_name__iexact=item_name).exists():
         return Response(
             {"detail": "Item with this name already exists."},
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # If item does not exist, proceed to create the item
     serializer = ItemSerializer(data=request.data)
     if serializer.is_valid():
-        # Save the new item with status set to True
         serializer.save(status=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-    # Return validation errors if the serializer is invalid
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -39,24 +31,21 @@ def create_item(request):
 def get_items(request):
     """Retrieve all items where status is True (active), with optional search and pagination."""
     
-    # Apply filtering if search query is provided
     search_query = request.query_params.get('search', '')
-    items = Item.objects.filter(status=True)  # Only active items
+    items = Item.objects.filter(status=True)  
     
     if search_query:
-        items = items.filter(item_name__icontains=search_query)  # Search for items by name (case-insensitive)
+        items = items.filter(item_name__icontains=search_query) 
 
     # Pagination (optional)
     page = request.query_params.get('page', 1)
-    items_per_page = 10  # Number of items per page
+    items_per_page = 10  
     start_index = (int(page) - 1) * items_per_page
     end_index = start_index + items_per_page
     items = items[start_index:end_index]
     
-    # Serialize the data
     serializer = ItemSerializer(items, many=True)
     
-    # Return the response with paginated data
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -72,7 +61,7 @@ def get_item(request, item_id):
 def update_item(request, item_id):
     """Update an existing item."""
     item = get_object_or_404(Item, id=item_id)
-    serializer = ItemSerializer(item, data=request.data, partial=True)  # partial allows updating some fields
+    serializer = ItemSerializer(item, data=request.data, partial=True)  
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -89,17 +78,6 @@ def delete_item(request, item_id):
     item.save()
 
     return Response({"message": "Item marked as deleted."}, status=status.HTTP_204_NO_CONTENT)
-
-
-
-
-
-
-
-
-
-
-
 
 
 # Brand master views add api 
@@ -127,6 +105,6 @@ def create_brand(request):
 
 @api_view(['GET'])
 def get_brand(request):
-    brands = BrandMaster.objects.all()  # Retrieve all brand records
-    serializer = BrandMasterSerializer(brands, many=True)  # Serialize all brands
-    return Response(serializer.data)  # Return serialized data as response
+    brands = BrandMaster.objects.all()  
+    serializer = BrandMasterSerializer(brands, many=True)  
+    return Response(serializer.data)  
