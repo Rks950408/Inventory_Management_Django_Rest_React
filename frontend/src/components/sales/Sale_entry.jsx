@@ -49,7 +49,7 @@ const SaleEntry = () => {
 
   const handleSupplierChange = (e) => setSupplier(e.target.value);
 const handleItemChange = async (selectedItemName) => {
-  setItemName(selectedItemName); // Update the selected item name state
+  setItemName(selectedItemName); 
 
   const selectedItem = items.find(
     (item) => item.item_name === selectedItemName
@@ -62,13 +62,11 @@ const handleItemChange = async (selectedItemName) => {
     setBrand(selectedBrand ? selectedBrand.brand_name : "Brand Not Found");
     setPrice(selectedItem.unit_price);
 
-    // Fetch available quantity for the selected item
     try {
       const quantityResponse = await axios.get(
         `http://127.0.0.1:8001/purchases/total-quantity/${selectedItem.id}/`
       );
 
-      // Check if the response has the expected data format
       if (
         quantityResponse.data &&
         quantityResponse.data.available_quantity !== undefined
@@ -84,7 +82,6 @@ const handleItemChange = async (selectedItemName) => {
       setAvailableQuantity("Error fetching quantity");
     }
   } else {
-    // Reset states if no item is selected
     setBrand("No Item Selected");
     setPrice("");
     setAvailableQuantity("");
@@ -95,16 +92,14 @@ const handleItemChange = async (selectedItemName) => {
    if (itemName && price && quantity) {
      const enteredQuantity = parseInt(quantity, 10);
 
-     // Check if quantity is greater than zero
      if (enteredQuantity <= 0) {
        alert("Quantity must be greater than zero.");
-       return; // Exit function if invalid quantity
+       return; 
      }
 
-     // If entered quantity is less than or equal to available quantity
      if (enteredQuantity > parseInt(availableQuantity, 10)) {
        alert("Entered quantity is greater than available stock!");
-       return; // Exit function if quantity is greater than available stock
+       return; 
      }
 
      const itemTotal = parseFloat((price * enteredQuantity).toFixed(2));
@@ -149,54 +144,47 @@ const handleItemChange = async (selectedItemName) => {
   };
 
   const handleSubmit = async () => {
-    // Format the purchase details to match the sale details structure
     const formattedSaleDetails = purchaseDetails.map((item) => ({
-      item_name: item.itemName, // Corresponds to the item name
-      brand_name: item.brand, // Corresponds to the brand name
-      price: item.price, // Price of the item
-      quantity: item.quantity, // Quantity purchased
-      amount: item.total, // Total amount for this item (price * quantity)
+      item_name: item.itemName, 
+      brand_name: item.brand, 
+      price: item.price, 
+      quantity: item.quantity, 
+      amount: item.total, 
     }));
 
-    // Structure the purchase data with all required fields
     const saleData = {
       invoice_no: invoiceNo,
       invoice_date: invoiceDate,
-      customer: supplier, // Customer corresponds to supplier here
-      total_amount: subTotal, // Total amount for the entire sale
-      status: true, // Optional field, set to true by default
-      sale_details: formattedSaleDetails, // The formatted sale details
+      customer: supplier, 
+      total_amount: subTotal, 
+      status: true, 
+      sale_details: formattedSaleDetails, 
     };
 
     try {
-      // Make the POST request to the API
       const response = await axios.post(
         "http://127.0.0.1:8001/purchases/sales/create/",
         saleData,
         {
           headers: {
-            "Content-Type": "application/json", // Set the correct content type
+            "Content-Type": "application/json", 
           },
         }
       );
 
-      // Log the successful response
       console.log("Sale data submitted successfully:", response.data);
-      setSuccessMessage(response.data.message); // Show the success message
+      setSuccessMessage(response.data.message); 
 
-      // Reset form values after successful submission
       setInvoiceNo("");
       setInvoiceDate("");
       setSupplier("");
       setPurchaseDetails([]);
       setSubTotal(0);
     } catch (error) {
-      // Log any errors if the request fails
       console.error("Error submitting Sale data:", error);
       setSuccessMessage("Failed to submit Sale data. Please try again.");
     }
 
-    // Navigate to the purchase list after a short delay
     setTimeout(() => {
       navigate("/sale-list");
     }, 1000);
@@ -231,7 +219,7 @@ const handleItemChange = async (selectedItemName) => {
           />
         </div>
         <div>
-          <label className="block mb-2">Supplier Name:</label>
+          <label className="block mb-2">Customer Name:</label>
           <select
             value={supplier}
             onChange={handleSupplierChange}
@@ -288,7 +276,7 @@ const handleItemChange = async (selectedItemName) => {
           <label className="block mb-2">Available Quantity:</label>
           <input
             type="text"
-            value={availableQuantity} // Display available quantity
+            value={availableQuantity} 
             readOnly
             className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
           />
@@ -301,7 +289,6 @@ const handleItemChange = async (selectedItemName) => {
             onChange={(e) => {
               const newQuantity = e.target.value;
 
-              // Check if the new quantity is greater than or equal to 1
               if (newQuantity >= 0 || newQuantity === "") {
                 setQuantity(newQuantity);
                 setTotal(newQuantity * price);

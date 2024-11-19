@@ -31,7 +31,7 @@ const SupplierList = () => {
             <th className="py-2 px-4 border-b text-left">Name</th>
             <th className="py-2 px-4 border-b text-left">Contact</th>
             <th className="py-2 px-4 border-b text-left">Address</th>
-            <th className="py-2 px-4 border-b text-left">Status</th>
+            {/* <th className="py-2 px-4 border-b text-left">Status</th> */}
           </tr>
         </thead>
         <tbody>
@@ -41,9 +41,9 @@ const SupplierList = () => {
                 <td className="py-2 px-4">{supplier.name}</td>
                 <td className="py-2 px-4">{supplier.contact}</td>
                 <td className="py-2 px-4">{supplier.address}</td>
-                <td className="py-2 px-4">
+                {/* <td className="py-2 px-4">
                   {supplier.status ? "Active" : "Inactive"}
-                </td>
+                </td> */}
               </tr>
             ))
           ) : (

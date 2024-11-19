@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import ItemRow from "./ItemRow";
 
 const ItemList = () => {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState([]); 
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     // Fetch items from your API endpoint
@@ -14,25 +16,33 @@ const ItemList = () => {
         );
         if (response.ok) {
           const data = await response.json();
-          setItems(data);
+          console.log("Fetched data:", data); 
+          setItems(Array.isArray(data) ? data : []);
         } else {
           console.error("Failed to fetch items:", response.status);
+          setItems([]);  
         }
       } catch (error) {
         console.error("Error fetching items:", error);
+        setItems([]);  
       }
     };
+
     fetchItems();
-  }, [searchQuery]);
+  }, [searchQuery]); 
 
   const handleSearch = (e) => {
     e.preventDefault();
+    setCurrentPage(1);  
     setSearchQuery(e.target.search.value);
   };
 
   const handleDeleteItem = (itemId) => {
-    // Remove the deleted item from the state
     setItems(items.filter((item) => item.id !== itemId));
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -46,7 +56,8 @@ const ItemList = () => {
             name="search"
             className="form-input w-96 border border-gray-300 rounded-l-md p-2"
             placeholder="Search items..."
-            defaultValue={searchQuery}
+            value={searchQuery}  
+            onChange={(e) => setSearchQuery(e.target.value)}  
           />
           <button
             className="btn bg-blue-500 text-white rounded-r-md p-2"
@@ -70,7 +81,7 @@ const ItemList = () => {
           </tr>
         </thead>
         <tbody>
-          {items.length > 0 ? (
+          {Array.isArray(items) && items.length > 0 ? (
             items.map((item, index) => (
               <ItemRow
                 key={item.id}
@@ -88,6 +99,36 @@ const ItemList = () => {
           )}
         </tbody>
       </table>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center mt-4">
+  <button
+    onClick={() => handlePageChange(currentPage - 1)}
+    disabled={currentPage === 0}
+    className={`btn text-white rounded p-2 ${
+      currentPage === 1 ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500"
+    }`}
+  >
+    Prev
+  </button>
+
+  <span className="my-auto text-lg">
+    Page {currentPage} of {totalPages}
+  </span>
+
+  <button
+    onClick={() => handlePageChange(currentPage + 1)}
+    disabled={currentPage === totalPages}
+    className={`btn text-white rounded p-2 ${
+      currentPage === totalPages ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500"
+    }`}
+  >
+    Next
+  </button>
+       </div>
+
+
+      {/* Add Item Button */}
       <div className="flex justify-center mt-4">
         <a
           href="/add-item"

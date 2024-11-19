@@ -2,9 +2,9 @@ from rest_framework import serializers
 from .models import PurchaseMaster, PurchaseDetails,SaleDetails,SaleMaster
 from item_master.models import Item
 from supplier.models import Supplier
-from .supplier_serializers import SupplierSerializer  # Corrected import
+from .supplier_serializers import SupplierSerializer  
 class PurchaseDetailsSerializer(serializers.ModelSerializer):
-    item_name = serializers.CharField(write_only=True)  # Accepts item name from frontend instead of ID
+    item_name = serializers.CharField(write_only=True)  
 
     class Meta:
         model = PurchaseDetails
@@ -12,20 +12,20 @@ class PurchaseDetailsSerializer(serializers.ModelSerializer):
 
     def validate_item_name(self, value):
         try:
-            item = Item.objects.get(item_name=value)  # Convert item_name to item instance
+            item = Item.objects.get(item_name=value) 
             return item
         except Item.DoesNotExist:
             raise serializers.ValidationError(f"Item '{value}' not found.")
 
     def create(self, validated_data):
-        item_instance = validated_data.pop('item_name')  # Replace item_name with item instance
+        item_instance = validated_data.pop('item_name')  
         purchase_detail = PurchaseDetails.objects.create(item=item_instance, **validated_data)
         return purchase_detail
 
 
 class PurchaseMasterSerializer(serializers.ModelSerializer):
-    supplier = serializers.CharField(write_only=True)  # Accepts supplier name instead of ID
-    purchase_details = PurchaseDetailsSerializer(many=True)  # Nested serializer for multiple purchase details
+    supplier = serializers.CharField(write_only=True)  
+    purchase_details = PurchaseDetailsSerializer(many=True)  
 
     class Meta:
         model = PurchaseMaster
@@ -33,7 +33,7 @@ class PurchaseMasterSerializer(serializers.ModelSerializer):
 
     def validate_supplier(self, value):
         try:
-            supplier = Supplier.objects.get(name=value)  # Convert supplier name to supplier instance
+            supplier = Supplier.objects.get(name=value)  
             return supplier
         except Supplier.DoesNotExist:
             raise serializers.ValidationError(f"Supplier '{value}' not found.")
@@ -42,15 +42,13 @@ class PurchaseMasterSerializer(serializers.ModelSerializer):
         supplier_instance = validated_data.pop('supplier')
         purchase_details_data = validated_data.pop('purchase_details')
 
-        # Create PurchaseMaster entry
         purchase_master = PurchaseMaster.objects.create(
             supplier=supplier_instance,
             **validated_data
         )
 
-        # Create PurchaseDetails entries
         for detail_data in purchase_details_data:
-            item = detail_data.pop('item_name')  # Retrieve item instance from validated data
+            item = detail_data.pop('item_name') 
             PurchaseDetails.objects.create(
                 purchase_master=purchase_master,
                 item=item,
@@ -67,18 +65,16 @@ class PurchaseMasterSerializer1(serializers.ModelSerializer):
         model = PurchaseMaster
         fields = ['id', 'invoice_no', 'invoice_date', 'total_amount', 'datetime', 'status', 'supplier_name']
 
-# Serializer for PurchaseDetails, including item_name
 class PurchaseDetailsSerializer2(serializers.ModelSerializer):
-    item_name = serializers.CharField(source='item.item_name', read_only=True)  # Correct field name
+    item_name = serializers.CharField(source='item.item_name', read_only=True)  
 
     class Meta:
         model = PurchaseDetails
         fields = ['id', 'item_name', 'brand_name', 'quantity', 'price', 'amount', 'datetime', 'status']
 
-# Serializer for PurchaseMaster with nested PurchaseDetails
 class PurchaseMasterSerializer2(serializers.ModelSerializer):
-    purchase_details = PurchaseDetailsSerializer2(source='purchasedetails_set', many=True)  # Related field name might vary
-    supplier = SupplierSerializer()  # Include the supplier details
+    purchase_details = PurchaseDetailsSerializer2(source='purchasedetails_set', many=True)  
+    supplier = SupplierSerializer()  
     class Meta:
         model = PurchaseMaster
         fields = ['id', 'invoice_no', 'invoice_date', 'supplier', 'total_amount', 'datetime', 'status', 'purchase_details']
@@ -86,7 +82,7 @@ class PurchaseMasterSerializer2(serializers.ModelSerializer):
 
 # sale serializers
 class SaleDetailsSerializer(serializers.ModelSerializer):
-    item_name = serializers.CharField(write_only=True)  # Accepts item name from frontend
+    item_name = serializers.CharField(write_only=True)  
 
     class Meta:
         model = SaleDetails
@@ -94,19 +90,19 @@ class SaleDetailsSerializer(serializers.ModelSerializer):
 
     def validate_item_name(self, value):
         try:
-            item = Item.objects.get(item_name=value)  # Convert item_name to item instance
+            item = Item.objects.get(item_name=value)  
             return item
         except Item.DoesNotExist:
             raise serializers.ValidationError(f"Item '{value}' not found.")
 
     def create(self, validated_data):
-        item_instance = validated_data.pop('item_name')  # Replace item_name with item instance
+        item_instance = validated_data.pop('item_name')   
         sale_detail = SaleDetails.objects.create(item=item_instance, **validated_data)
         return sale_detail
 
 class SaleMasterSerializer(serializers.ModelSerializer):
-    customer = serializers.CharField(write_only=True)  # Accepts supplier name instead of ID
-    sale_details = SaleDetailsSerializer(many=True)  # Nested serializer for multiple sale details
+    customer = serializers.CharField(write_only=True)   
+    sale_details = SaleDetailsSerializer(many=True)   
 
     class Meta:
         model = SaleMaster
@@ -114,7 +110,7 @@ class SaleMasterSerializer(serializers.ModelSerializer):
 
     def validate_customer(self, value):
         try:
-            customer = Supplier.objects.get(name=value)  # Convert customer name to supplier instance
+            customer = Supplier.objects.get(name=value)   
             return customer
         except Supplier.DoesNotExist:
             raise serializers.ValidationError(f"Customer '{value}' not found.")
@@ -123,12 +119,10 @@ class SaleMasterSerializer(serializers.ModelSerializer):
         customer_instance = validated_data.pop('customer')
         sale_details_data = validated_data.pop('sale_details')
 
-        # Create SaleMaster entry
         sale_master = SaleMaster.objects.create(customer=customer_instance, **validated_data)
 
-        # Create SaleDetails entries
         for detail_data in sale_details_data:
-            item = detail_data.pop('item_name')  # Retrieve item instance from validated data
+            item = detail_data.pop('item_name')  
             SaleDetails.objects.create(
                 sale_master=sale_master,
                 item=item,
@@ -137,38 +131,7 @@ class SaleMasterSerializer(serializers.ModelSerializer):
 
         return sale_master
 
-
-# ------------------------second---------------------
-# Serializer for SaleDetails
-# class SaleDetailsSerializer1(serializers.ModelSerializer):
-#     item_name = serializers.CharField(write_only=True)  # Accepts item name from frontend
-
-#     class Meta:
-#         model = SaleDetails
-#         fields = ['item_name', 'brand_name', 'quantity', 'price', 'amount', 'status']
-
-#     def validate_item_name(self, value):
-#         try:
-#             item = Item.objects.get(item_name=value)  # Convert item_name to item instance
-#             return item
-#         except Item.DoesNotExist:
-#             raise serializers.ValidationError(f"Item '{value}' not found.")
-
-#     def create(self, validated_data):
-#         item_instance = validated_data.pop('item_name')  # Replace item_name with item instance
-#         sale_detail = SaleDetails.objects.create(item=item_instance, **validated_data)
-#         return sale_detail
-
-# class SaleMasterSerializer1(serializers.ModelSerializer):
-#     sale_details = SaleDetailsSerializer1(many=True)  # Nested serializer for SaleDetails
-
-#     class Meta:
-#         model = SaleMaster
-#         fields = ['id', 'invoice_no', 'invoice_date', 'total_amount', 'sale_details']  # Correct the field name to invoice_date
-
-
 class SaleDetailsSerializer1(serializers.ModelSerializer):
-    # Retrieve the item_name from the related Item object
     item_name = serializers.CharField(source='item.item_name', read_only=True)
 
     class Meta:
@@ -178,14 +141,13 @@ class SaleDetailsSerializer1(serializers.ModelSerializer):
 
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Supplier  # Assuming the Supplier model has fields like id, name, contact, etc.
+        model = Supplier 
         fields = ['id', 'name', 'contact', 'address', 'status', 'entry_date']
 
 
 class SaleMasterSerializer1(serializers.ModelSerializer):
-    # Nested serializer for the customer/supplier details
     customer = SupplierSerializer(read_only=True)
-    sale_details = SaleDetailsSerializer1(many=True)  # Nested serializer for SaleDetails
+    sale_details = SaleDetailsSerializer1(many=True)  
 
     class Meta:
         model = SaleMaster
@@ -194,21 +156,21 @@ class SaleMasterSerializer1(serializers.ModelSerializer):
 
 # details for 
 class PurchaseDetailsSerializer2(serializers.ModelSerializer):
-    item_name = serializers.CharField(source='item.item_name')  # Add item name from Item model
-    total_price = serializers.SerializerMethodField()  # Add a field to calculate total_price
-    supplier_name= serializers.CharField(source='purchase_master.supplier')  # Adjust 'name' to the correct field in Supplier
+    item_name = serializers.CharField(source='item.item_name')  
+    total_price = serializers.SerializerMethodField()  
+    supplier_name= serializers.CharField(source='purchase_master.supplier')  
     class Meta:
         model = PurchaseDetails
         fields = ['id', 'item_name', 'price', 'quantity', 'total_price', 'datetime', 'supplier_name']
 
     def get_total_price(self, obj):
-        return obj.price * obj.quantity if obj.price and obj.quantity else 0  # Calculate total price
+        return obj.price * obj.quantity if obj.price and obj.quantity else 0  
 
 
 class SaleDetailsSerializer2(serializers.ModelSerializer):
-    item_name = serializers.CharField(source='item.item_name')  # Add item name from Item model
-    total_amount = serializers.FloatField(source='amount')  # Alias for amount
-    customer_name = serializers.CharField(source='sale_master.customer')  # Adjust for customer name in SaleMaster
+    item_name = serializers.CharField(source='item.item_name')  
+    total_amount = serializers.FloatField(source='amount')  
+    customer_name = serializers.CharField(source='sale_master.customer')  
 
     class Meta:
         model = SaleDetails
