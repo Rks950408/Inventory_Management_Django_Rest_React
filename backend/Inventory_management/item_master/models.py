@@ -36,6 +36,6 @@ class Item(models.Model):
         
     class Meta:
         db_table = 'item_master'
-        # managed=False
+        # managed=False.........................
         
 
