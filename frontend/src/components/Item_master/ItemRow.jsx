@@ -5,7 +5,7 @@ const ItemRow = ({ item, index, onDelete }) => {
   const [showModal, setShowModal] = useState(false); 
   const [loading, setLoading] = useState(false); 
 
-  const imageUrl = item.image ? `/media/${item.image}` : '/path/to/default-image.jpg'; 
+  // const imageUrl = item.image ? `/media/${item.image}` : '/path/to/default-image.jpg'; 
 
   const handleDelete = async () => {
     try {
